@@ -1,0 +1,11 @@
+# secrets & personal data — never in a public repo
+.env
+Takeout/
+*.zip
+*.csv
+bilbao-import.json
+
+# build & runtime artefacts
+/trips
+*.db
+scratchpad/

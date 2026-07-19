@@ -1,0 +1,24 @@
+app:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/kieranajp/trips
+    tag: latest
+  service:
+    port: 8080
+    type: ClusterIP
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "10m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
+
+# SQLite lives on a single RWO volume. Keep replicaCount at 1 (see deployment).
+persistence:
+  size: 128Mi
+  storageClass: local-path
+
+ingress:
+  enabled: true
+  host: "trips.kieranajp.uk"

@@ -1,0 +1,373 @@
+{
+  "id": "bilbao",
+  "title": "Bilbao",
+  "subtitle": "trip map",
+  "blurb": "Four slow nights in the Basque Country — pintxos, txakoli and the Guggenheim.",
+  "center": [
+    43.28,
+    -2.95
+  ],
+  "zoom": 12,
+  "geocodeHint": "Bilbao, Spain",
+  "geocodeCenter": [
+    43.263,
+    -2.935
+  ],
+  "base": {
+    "name": "Hotel Hesperia Bilbao",
+    "lat": 43.2678833,
+    "lng": -2.928129,
+    "url": "https://maps.google.com/?cid=9292624536039691993",
+    "note": "Campo de Volantín, right bank by the Zubizuri footbridge. Guggenheim's a short riverside walk NW; hop a bridge south for the Casco Viejo."
+  },
+  "categories": [
+    {
+      "id": "coffee",
+      "name": "Coffee",
+      "color": "#6f4e37"
+    },
+    {
+      "id": "lightbites",
+      "name": "Light bites",
+      "color": "#9c8b3b"
+    },
+    {
+      "id": "pintxos",
+      "name": "Pintxos",
+      "color": "#d9822b"
+    },
+    {
+      "id": "dinner",
+      "name": "Dinner",
+      "color": "#5f7d4a"
+    },
+    {
+      "id": "wine",
+      "name": "Wine",
+      "color": "#8c2f4a"
+    },
+    {
+      "id": "beer",
+      "name": "Beer",
+      "color": "#caa03a"
+    },
+    {
+      "id": "cocktails",
+      "name": "Cocktails",
+      "color": "#a34a76"
+    },
+    {
+      "id": "sights",
+      "name": "Sights",
+      "color": "#3f6ea3"
+    },
+    {
+      "id": "coast",
+      "name": "Coast & day trips",
+      "color": "#2c8f96"
+    },
+    {
+      "id": "saved",
+      "name": "Saved",
+      "color": "#5b6672"
+    }
+  ],
+  "seedOnMap": [
+    "gure",
+    "gatz",
+    "ginfizz",
+    "rufo",
+    "bridge",
+    "azkuna"
+  ],
+  "catalog": [
+    {
+      "cid": "gure",
+      "cat": "pintxos",
+      "name": "Gure Toki",
+      "lat": 43.2593788,
+      "lng": -2.9222899,
+      "url": "https://maps.google.com/?cid=6709673049881844562",
+      "note": "Creative gourmet pintxos and a properly good wine list, on Plaza Nueva. Worth the elbows. Closed Wednesdays."
+    },
+    {
+      "cid": "victor",
+      "cat": "pintxos",
+      "name": "Víctor Montes",
+      "lat": 43.2589036,
+      "lng": -2.9223596,
+      "url": "https://maps.google.com/?cid=2531814999063274416",
+      "note": "Grand old dame of the square: foie with caramelised apple, Cantabrian anchovies, the classics done right."
+    },
+    {
+      "cid": "gatz",
+      "cat": "pintxos",
+      "name": "Gatz",
+      "lat": 43.25819,
+      "lng": -2.92598,
+      "url": "https://maps.google.com/?cid=10888796572008131459",
+      "note": "Locals' favourite on C/ Santa María. Best bacalao al pil-pil in the old town, and cheap with it."
+    },
+    {
+      "cid": "vina",
+      "cat": "pintxos",
+      "name": "La Viña del Ensanche",
+      "lat": 43.2617626,
+      "lng": -2.9327006,
+      "url": "https://maps.google.com/?cid=7110447401509498690",
+      "note": "1927 institution, Michelin-listed. Joselito jamón and Iberico done exceptionally. Closed Mon & Sun eve."
+    },
+    {
+      "cid": "fueros",
+      "cat": "pintxos",
+      "name": "Los Fueros",
+      "lat": 43.2595294,
+      "lng": -2.9230478,
+      "url": "https://maps.google.com/?cid=17326950043757144492",
+      "note": "Michelin-listed but unfussy; the grilled squid is the standout. Closed Tuesdays."
+    },
+    {
+      "cid": "ginfizz",
+      "cat": "cocktails",
+      "name": "Gin Fizz",
+      "lat": 43.2663742,
+      "lng": -2.9313755,
+      "url": "https://maps.google.com/?cid=9462567463823128461",
+      "note": "The serious mixology spot near the Guggenheim. Own-recipe cocktails, deep whisky shelf (Hibiki in stock). Small room. Closed Mon, opens 15:30."
+    },
+    {
+      "cid": "cigar",
+      "cat": "cocktails",
+      "name": "La Antigua Cigarrería",
+      "lat": 43.262581,
+      "lng": -2.931292,
+      "url": "https://maps.google.com/?cid=10596973491831554758",
+      "note": "Old-guard coctelería near Gran Vía. Heavy on atmosphere; quiet early, livens up late."
+    },
+    {
+      "cid": "craft",
+      "cat": "beer",
+      "name": "The Craft Tabeerna",
+      "lat": 43.2577402,
+      "lng": -2.9249097,
+      "url": "https://maps.google.com/?cid=8364265191828522139",
+      "note": "Ten taps of mostly Spanish craft in the Casco Viejo. For when a real beer beats a thimble of txakoli. Closed Mon."
+    },
+    {
+      "cid": "rufo",
+      "cat": "dinner",
+      "name": "Casa Rufo",
+      "lat": 43.2585884,
+      "lng": -2.9316117,
+      "url": "https://maps.google.com/?cid=11909217870089936167",
+      "note": "75-year-old classic; the txuleta is the reason to come. Also a deli/wine shop. Closed Sun."
+    },
+    {
+      "cid": "getaria",
+      "cat": "dinner",
+      "name": "Asador Guetaria",
+      "lat": 43.2631167,
+      "lng": -2.9300831,
+      "url": "https://maps.google.com/?cid=123307606278132462",
+      "note": "Old-school asador — whole chuletón over coals, proper white tablecloths. Closed Mon."
+    },
+    {
+      "cid": "ribera",
+      "cat": "sights",
+      "name": "Mercado de la Ribera",
+      "lat": 43.2555913,
+      "lng": -2.9242454,
+      "url": "https://maps.google.com/?cid=17112323662182266207",
+      "note": "Art-deco riverside market, pintxos gallery upstairs. Best in the morning when the stalls are live."
+    },
+    {
+      "cid": "azkuna",
+      "cat": "sights",
+      "name": "Azkuna Zentroa",
+      "lat": 43.2597198,
+      "lng": -2.9371747,
+      "url": "https://maps.google.com/?cid=10032865328663185881",
+      "note": "Starck-renovated culture house: 43 mad pillars, a glass-bottomed pool overhead. Free, quiet, ideal rainy-day bolt-hole."
+    },
+    {
+      "cid": "gugg",
+      "cat": "sights",
+      "name": "Guggenheim",
+      "lat": 43.2686712,
+      "lng": -2.9340118,
+      "url": "https://maps.google.com/?cid=5803050537506008493",
+      "note": "Yes, the tourist thing — but the titanium hull first thing on a weekday is worth it. Closed Mon."
+    },
+    {
+      "cid": "bridge",
+      "cat": "coast",
+      "name": "Bizkaia Bridge",
+      "lat": 43.3232857,
+      "lng": -3.0171525,
+      "url": "https://maps.google.com/?cid=732760642006684258",
+      "note": "World's first transporter bridge, 1893. Ride the gondola across, lift up to the top walkway. Metro to Areeta/Portugalete."
+    },
+    {
+      "cid": "algorta",
+      "cat": "coast",
+      "name": "Puerto Viejo, Algorta",
+      "lat": 43.3490595,
+      "lng": -3.014646,
+      "url": "https://maps.google.com/?cid=10612544344768319155",
+      "note": "Old fishing quarter up the hillside; seafood, txakoli and the sunset over the Abra. Metro to Algorta, walk down."
+    },
+    {
+      "cid": "gaztel",
+      "cat": "coast",
+      "name": "San Juan de Gaztelugatxe",
+      "lat": 43.447,
+      "lng": -2.785,
+      "url": "https://maps.google.com/?cid=7095065896720656455",
+      "note": "Dragonstone. Stunning, but a demanding ~240-step hike and busy — needs a car or tour, and reserve ahead."
+    },
+    {
+      "cid": "mundaka",
+      "cat": "coast",
+      "name": "Mundaka",
+      "lat": 43.408017,
+      "lng": -2.7002508,
+      "url": "https://maps.google.com/?cid=5353553789346056666",
+      "note": "Sleepy surf town on the Urdaibai estuary; world-class left-hand wave, good seafood, proper wind-down."
+    },
+    {
+      "cid": "txomin",
+      "cat": "coast",
+      "name": "Txomin Etxaniz (Getaria)",
+      "lat": 43.2960394,
+      "lng": -2.1942006,
+      "url": "https://maps.google.com/?cid=8278311037680365914",
+      "note": "Cliffside txakoli bodega — Atlantic terroir, sea views. ~1hr east though: a full day trip, pairs with San Sebastián."
+    }
+  ],
+  "neighbourhoods": [
+    {
+      "name": "Indautxu / Ensanche",
+      "color": "#5f7d4a",
+      "note": "Where Bilbainos actually eat — no reservations, just follow the busiest bar. Poteo along Las Pozas, Ledesma & García Rivero; cocktail bars come evening (25–40 crowd, smart-casual). Buzz without the coach traffic. Your best bet for nights out.",
+      "ring": [
+        [
+          43.2648,
+          -2.933
+        ],
+        [
+          43.262,
+          -2.9293
+        ],
+        [
+          43.2584,
+          -2.9345
+        ],
+        [
+          43.2588,
+          -2.9422
+        ],
+        [
+          43.262,
+          -2.9445
+        ],
+        [
+          43.265,
+          -2.9398
+        ]
+      ]
+    },
+    {
+      "name": "Bilbao la Vieja (“Bilbi”)",
+      "color": "#a34a76",
+      "note": "Ex-mining quarter the artists took over — edgier, less polished, creative kitchens. After dark it's the alternative zone: underground and warehouse electronic. An afternoon-into-dinner wander when you want character over gloss.",
+      "ring": [
+        [
+          43.2553,
+          -2.9242
+        ],
+        [
+          43.2541,
+          -2.9224
+        ],
+        [
+          43.2505,
+          -2.9268
+        ],
+        [
+          43.25,
+          -2.9312
+        ],
+        [
+          43.2528,
+          -2.933
+        ],
+        [
+          43.2549,
+          -2.9288
+        ]
+      ]
+    },
+    {
+      "name": "Deusto",
+      "color": "#2c8f96",
+      "note": "Student side across the water — cheapest pintxos in the city, calm and green, riverside promenade for a morning walk. Laid-back kalimotxo energy; a cheap, easy evening. Your hotel sits on this same bank, just to the east.",
+      "ring": [
+        [
+          43.2762,
+          -2.9545
+        ],
+        [
+          43.2736,
+          -2.9438
+        ],
+        [
+          43.2702,
+          -2.9418
+        ],
+        [
+          43.2682,
+          -2.9482
+        ],
+        [
+          43.2712,
+          -2.9562
+        ]
+      ]
+    },
+    {
+      "name": "Casco Viejo",
+      "color": "#c2410c",
+      "note": "Approach with fortitude. Real neighbourhood life under it, but weekends bring crowds spilling into the streets — Perro, Jardines, Siete Calles, 7pm till late. You're midweek: hit Gure Toki/Gatz early, then retreat over the river. Plaza Nueva is prettiest, priciest, densest. A surgical strike, not a basecamp.",
+      "ring": [
+        [
+          43.2612,
+          -2.9246
+        ],
+        [
+          43.2608,
+          -2.9211
+        ],
+        [
+          43.2587,
+          -2.9201
+        ],
+        [
+          43.2561,
+          -2.9228
+        ],
+        [
+          43.2553,
+          -2.9246
+        ],
+        [
+          43.2574,
+          -2.9263
+        ],
+        [
+          43.2601,
+          -2.926
+        ]
+      ]
+    }
+  ]
+}

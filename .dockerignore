@@ -1,0 +1,8 @@
+Takeout/
+*.zip
+*.csv
+charts/
+scratchpad/
+.env
+bilbao-import.json
+cmd/

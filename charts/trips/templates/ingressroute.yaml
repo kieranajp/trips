@@ -1,0 +1,20 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # No auth — it's a list of bars. To lock it down, add the auth-token
+    # middleware (namespace: auth) here like the-bluer-book does.
+    - kind: Rule
+      match: Host(`{{ .Values.ingress.host }}`)
+      services:
+        - name: {{ .Release.Name }}
+          port: {{ .Values.app.service.port }}
+  tls:
+    certResolver: letsencrypt
+{{- end }}
