@@ -8,10 +8,19 @@ spec:
   entryPoints:
     - websecure
   routes:
-    # No auth — it's a list of bars. To lock it down, add the auth-token
-    # middleware (namespace: auth) here like the-bluer-book does.
+    # Authentik forward-auth callback (cross-namespace to the proxy outpost).
+    - kind: Rule
+      match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`/outpost.goauthentik.io/`)
+      services:
+        - name: ak-outpost-proxy
+          namespace: auth
+          port: 9000
+    # Everything else requires a valid Google session
     - kind: Rule
       match: Host(`{{ .Values.ingress.host }}`)
+      middlewares:
+        - name: auth-private
+          namespace: auth
       services:
         - name: {{ .Release.Name }}
           port: {{ .Values.app.service.port }}
