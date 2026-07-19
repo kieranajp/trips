@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"embed"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
@@ -24,6 +26,8 @@ var tripRe = regexp.MustCompile(`^[a-z0-9-]{1,64}$`)
 func validTrip(id string) bool { return tripRe.MatchString(id) }
 
 func main() {
+	loadEnvFile(".env")
+
 	path := os.Getenv("DB_PATH")
 	if path == "" {
 		path = "/data/trip.db"
@@ -89,4 +93,30 @@ func main() {
 	}
 	log.Println("trips listening on", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
+}
+
+// loadEnvFile sets KEY=VALUE lines from path into the environment, without
+// clobbering vars already set (real env wins over the file).
+func loadEnvFile(path string) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		line := strings.TrimSpace(s.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		k, v, ok := strings.Cut(line, "=")
+		if !ok {
+			continue
+		}
+		if k = strings.TrimSpace(k); k != "" {
+			if _, set := os.LookupEnv(k); !set {
+				os.Setenv(k, strings.Trim(strings.TrimSpace(v), `"'`))
+			}
+		}
+	}
 }
