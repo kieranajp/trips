@@ -7,7 +7,7 @@ export const trips = signal([]);     // picker index (from /trips/index.json)
 export const trip = signal(null);    // active trip definition, null = show picker
 export const cats = signal([]);
 export const pins = signal([]);
-export const hidden = signal(new Set()); // hidden category ids (view-only, not persisted)
+export const only = signal(null);        // solo filter: show only this category id (null = all)
 export const tab = signal("map");        // map | ideas | setup
 export const areasOn = signal(true);
 export const placing = signal(false);    // "click the map to drop a pin" mode
@@ -97,10 +97,6 @@ export function toast(m) { toastMsg.value = m; clearTimeout(tT); tT = setTimeout
 
 // ---- pin mutations ----
 export function addPin(p) { pins.value = [...pins.value, p]; save(); }
-export function movePin(id, lat, lng) {
-  pins.value = pins.value.map((p) => (p.id === id ? { ...p, lat: +lat.toFixed(6), lng: +lng.toFixed(6) } : p));
-  save();
-}
 export function removePin(id) {
   const p = pins.value.find((x) => x.id === id); if (!p) return;
   if (!confirm(`Remove “${p.name}”?`)) return;
@@ -142,11 +138,7 @@ export function deleteCat(id) {
 }
 
 // ---- filters ----
-export function toggleHidden(id) {
-  const s = new Set(hidden.value);
-  s.has(id) ? s.delete(id) : s.add(id);
-  hidden.value = s;
-}
+export function toggleOnly(id) { only.value = only.value === id ? null : id; }
 
 // ---- reset / import / export ----
 export function reset() {
@@ -184,7 +176,7 @@ function importJson(data) {
 }
 
 // Google Takeout CSV (Title,Note,URL,...). No coords in the file, so geocode
-// each name via Nominatim — draggable pins fix any misses.
+// each name via Nominatim — edit a pin's coordinates to fix any misses.
 // ponytail: 1 req/sec per Nominatim usage policy; fine for a one-off list.
 function parseCsv(text) {
   const rows = []; let row = [], field = "", q = false;
@@ -229,7 +221,7 @@ async function importCsv(text) {
     const ll = await geocode(items[i].name, hint);
     let { name, note } = items[i], lat, lng;
     if (ll) { lat = ll.lat; lng = ll.lng; }
-    else { lat = clat; lng = clng; note = (note ? note + " — " : "") + "⚠ auto-locate failed, drag me"; failed++; }
+    else { lat = clat; lng = clng; note = (note ? note + " — " : "") + "⚠ auto-locate failed — edit to set location"; failed++; }
     if (!dupe(lat, lng, name)) { addPin({ id: "p_" + Math.random().toString(36).slice(2), name, lat, lng, cat: "saved", note, src: null }); added++; }
     if (i < items.length - 1) await sleep(1100);
   }

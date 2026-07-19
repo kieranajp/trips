@@ -1,7 +1,7 @@
 // Leaflet lives outside the component tree. It reacts to signals via effect(),
 // and reads the active trip definition for center/zoom/base/neighbourhoods.
 import { effect } from "@preact/signals";
-import { pins, cats, hidden, areasOn, placing, editing, trip, catById, movePin } from "./state.js";
+import { pins, cats, only, areasOn, placing, editing, trip, catById } from "./state.js";
 import { esc } from "./util.js";
 
 const L = window.L;
@@ -32,11 +32,10 @@ function renderMarkers() {
   markerLayer.clearLayers();
   for (const k in markers) delete markers[k];
   pins.value.forEach((p) => {
-    if (hidden.value.has(p.cat)) return;
+    if (only.value && p.cat !== only.value) return;
     const c = catById(p.cat);
-    const m = L.marker([p.lat, p.lng], { icon: pinIcon(c.color), draggable: true }).addTo(markerLayer);
+    const m = L.marker([p.lat, p.lng], { icon: pinIcon(c.color) }).addTo(markerLayer);
     m.bindPopup(popupHtml(p));
-    m.on("dragend", (e) => { const ll = e.target.getLatLng(); movePin(p.id, ll.lat, ll.lng); });
     m.on("popupopen", (ev) => {
       const b = ev.popup._contentNode.querySelector("[data-edit]");
       if (b) b.onclick = () => { map.closePopup(); editing.value = { pin: pins.value.find((x) => x.id === p.id) }; };
@@ -88,7 +87,7 @@ export function mountMap(el) {
   });
 
   // reactive wiring
-  effect(renderMarkers);                                                    // pins / cats / hidden
+  effect(renderMarkers);                                                    // pins / cats / only
   effect(() => { areasOn.value ? nbLayer.addTo(map) : map.removeLayer(nbLayer); });
   effect(() => { map.getContainer().style.cursor = placing.value ? "crosshair" : ""; });
 

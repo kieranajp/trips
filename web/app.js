@@ -2,9 +2,9 @@ import { render } from "preact";
 import { useRef, useEffect, useState } from "preact/hooks";
 import { html } from "htm/preact";
 import {
-  trips, trip, cats, pins, hidden, tab, areasOn, placing, editing, toastMsg,
+  trips, trip, cats, pins, only, tab, areasOn, placing, editing, toastMsg,
   boot, initSync, toast, onMap,
-  savePin, removePin, toggleCatalog, toggleHidden,
+  savePin, removePin, toggleCatalog, toggleOnly,
   updateCat, addCat, deleteCat, reset, exportJson, importFile,
 } from "./state.js";
 import { trim } from "./util.js";
@@ -46,19 +46,21 @@ function Header() {
 function Filters() {
   return html`
     <div class="filters">
-      <span class="flabel">Show</span>
+      <span class="flabel">${only.value ? "Showing one — tap again for all" : "Tap to show only"}</span>
       ${cats.value.map((c) => {
         const n = pins.value.filter((p) => p.cat === c.id).length;
-        return html`<span class=${"chip" + (hidden.value.has(c.id) ? " off" : "")} onClick=${() => toggleHidden(c.id)}>
-          <span class="sw" style=${`background:${c.color}`}></span>${c.name} <span style="color:var(--muted)">${n}</span></span>`;
+        const active = only.value === c.id;
+        return html`<span class=${"chip" + (active ? " on" : "") + (only.value && !active ? " off" : "")}
+          title="Show only this" onClick=${() => toggleOnly(c.id)}>
+          <span class="sw" style=${`background:${c.color}`}></span>${c.name} <span class="cnt">${n}</span></span>`;
       })}
     </div>`;
 }
 
 function PinList() {
-  const visible = pins.value.filter((p) => !hidden.value.has(p.cat));
+  const visible = only.value ? pins.value.filter((p) => p.cat === only.value) : pins.value;
   if (!visible.length)
-    return html`<div class="pinlist"><div class="empty">No pins shown. Add one, enable a category above, or grab some from the Ideas tab.</div></div>`;
+    return html`<div class="pinlist"><div class="empty">No pins to show. Add one, or grab some from the Ideas tab.</div></div>`;
   return html`
     <div class="pinlist">
       ${cats.value.map((c) => {
@@ -93,7 +95,7 @@ function MapView() {
       <div id="map" ref=${ref}></div>
       <aside class="side">
         <h2>Your pins</h2>
-        <div class="subtle">Tap a pin in the list to fly to it. Drag any marker to nudge it.</div>
+        <div class="subtle">Tap a pin in the list to fly to it; tap a category below to show only that.</div>
         <div class="actionbar">
           <button class=${"btn primary" + (placing.value ? " armed" : "")}
             onClick=${() => (placing.value = !placing.value)}>${placing.value ? "Click the map…" : "+ Add pin"}</button>

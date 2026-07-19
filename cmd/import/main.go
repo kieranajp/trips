@@ -19,7 +19,7 @@ import (
 const csvPath = "Takeout/Saved/Bilbao.csv"
 const outPath = "bilbao-import.json"
 
-// Bilbao centre — where a place Google can't find lands, ready to be dragged.
+// Bilbao centre — where a place Google can't find lands, ready to be corrected.
 var center = struct{ lat, lng float64 }{43.263, -2.935}
 
 // Seed categories, mirrored from web/data.js so a merge/replace import keeps the bucket set.
@@ -82,7 +82,7 @@ func main() {
 			if note != "" {
 				p.Note = note + " — "
 			}
-			p.Note += "⚠ Google couldn't place it, drag me"
+			p.Note += "⚠ Google couldn't place it — edit to set location"
 			missed++
 			fmt.Printf("  ✗ %-40s (dropped at centre)\n", title)
 		}
