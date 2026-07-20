@@ -1,5 +1,6 @@
 import { html } from "htm/preact";
 import { flights, stays, tab } from "../../state/signals.js";
+import { canEdit } from "../../state/auth.js";
 import { editLog, removeFlight, removeStay } from "../../state/actions.js";
 import { fmtDateTime, fmtTime, nights, sameDay } from "./format.js";
 
@@ -13,26 +14,28 @@ function FlightCard({ flight }) {
         ? `${fmtDateTime(flight.depart)} – ${fmtTime(flight.arrive)}`
         : [fmtDateTime(flight.depart), flight.arrive ? fmtDateTime(flight.arrive) : null].filter(Boolean).join(" → "))
     : "";
+  const editable = canEdit.value;
   return html`
     <div class="logi">
       <div class="logi-glyph">✈</div>
-      <div class="logi-body" onClick=${() => editLog("flight", flight)}>
+      <div class="logi-body" onClick=${editable ? () => editLog("flight", flight) : null}>
         <div class="logi-hd">${route || carrier || "Flight"}</div>
         ${carrier && route ? html`<div class="logi-sub">${carrier}</div>` : null}
         ${when ? html`<div class="logi-when">${when}</div>` : null}
         ${flight.confirmation ? html`<div class="logi-meta">Ref ${flight.confirmation}</div>` : null}
         ${flight.note ? html`<div class="logi-note">${flight.note}</div>` : null}
       </div>
-      <span class="logi-x" title="Remove" onClick=${() => removeFlight(flight.id)}>×</span>
+      ${editable ? html`<span class="logi-x" title="Remove" onClick=${() => removeFlight(flight.id)}>×</span>` : null}
     </div>`;
 }
 
 function StayCard({ stay }) {
   const count = nights(stay.checkIn, stay.checkOut);
+  const editable = canEdit.value;
   return html`
     <div class="logi">
       <div class="logi-glyph">🛏</div>
-      <div class="logi-body" onClick=${() => editLog("stay", stay)}>
+      <div class="logi-body" onClick=${editable ? () => editLog("stay", stay) : null}>
         <div class="logi-hd">${stay.name || "Stay"}</div>
         ${stay.address ? html`<div class="logi-sub">${stay.address}</div>` : null}
         ${stay.checkIn || stay.checkOut ? html`
@@ -49,7 +52,7 @@ function StayCard({ stay }) {
         </div>
         ${stay.note ? html`<div class="logi-note">${stay.note}</div>` : null}
       </div>
-      <span class="logi-x" title="Remove" onClick=${() => removeStay(stay.id)}>×</span>
+      ${editable ? html`<span class="logi-x" title="Remove" onClick=${() => removeStay(stay.id)}>×</span>` : null}
     </div>`;
 }
 
@@ -63,7 +66,7 @@ export function TripView() {
 
         <div class="logi-hdr">
           <h3>Flights</h3>
-          <button class="btn mini primary" onClick=${() => editLog("flight")}>+ Add flight</button>
+          ${canEdit.value ? html`<button class="btn mini primary" onClick=${() => editLog("flight")}>+ Add flight</button>` : null}
         </div>
         ${sortedFlights.length
           ? sortedFlights.map((flight) => html`<${FlightCard} key=${flight.id} flight=${flight}/>`)
@@ -71,7 +74,7 @@ export function TripView() {
 
         <div class="logi-hdr">
           <h3>Stays</h3>
-          <button class="btn mini primary" onClick=${() => editLog("stay")}>+ Add stay</button>
+          ${canEdit.value ? html`<button class="btn mini primary" onClick=${() => editLog("stay")}>+ Add stay</button>` : null}
         </div>
         ${sortedStays.length
           ? sortedStays.map((stay) => html`<${StayCard} key=${stay.id} stay=${stay}/>`)

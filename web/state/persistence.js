@@ -1,4 +1,5 @@
 import { cats, flights, pins, stays, trip } from "./signals.js";
+import { canEdit } from "./auth.js";
 
 const lsKey = (id) => "trip_state_" + id;
 
@@ -31,6 +32,9 @@ export function save() {
 
 async function pushState(body = snapshot()) {
   if (body === lastSynced) return;
+  // Writes require a login; the ingress rejects them otherwise. Skip the doomed
+  // request when logged out — localStorage still holds the latest state.
+  if (!canEdit.value) return;
   try {
     const res = await fetch(`/state?trip=${trip.value.id}`, {
       method: "PUT",

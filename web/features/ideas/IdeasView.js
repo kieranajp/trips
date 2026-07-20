@@ -1,5 +1,6 @@
 import { html } from "htm/preact";
 import { cats, onMap, tab, trip } from "../../state/signals.js";
+import { canEdit } from "../../state/auth.js";
 import { toggleCatalog } from "../../state/actions.js";
 
 export function IdeasView() {
@@ -18,9 +19,13 @@ export function IdeasView() {
               return html`
                 <div class="idea">
                   <div class="txt"><div class="nm">${item.name}</div><div class="nt">${item.note}</div></div>
-                  <div class="act"><button class=${"btn mini " + (added ? "" : "primary")}
-                    title=${added ? "Click to remove from map" : ""} onClick=${() => toggleCatalog(item)}>
-                    ${added ? "On map ✓" : "Add"}</button></div>
+                  <div class="act">
+                    ${canEdit.value
+                      ? html`<button class=${"btn mini " + (added ? "" : "primary")}
+                          title=${added ? "Click to remove from map" : ""} onClick=${() => toggleCatalog(item)}>
+                          ${added ? "On map ✓" : "Add"}</button>`
+                      : added ? html`<span class="idea-tag">On map ✓</span>` : null}
+                  </div>
                 </div>`;
             })}`;
         })}
