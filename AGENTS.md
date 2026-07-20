@@ -49,6 +49,15 @@ They are **not** part of the running app. They read the gitignored Bilbao CSV, c
 
 Any push to `main` (docs included) triggers a full build + deploy.
 
+## Auth is enforced at the ingress by method+path, not in Go
+
+There is **no auth code in `main.go`** — the handlers trust that whatever reaches them already cleared Authentik. Access is decided in `charts/trips/templates/ingressroute.yaml` (Traefik `IngressRoute`), by Traefik rule **priority**:
+
+- **All GET/HEAD/OPTIONS are public** (the priority-80 rule). So a new read endpoint returning private data is **public by default** — it silently falls through to that rule. Guard it with a higher-priority `PathPrefix(...)` rule carrying the `auth-private` middleware (see the `/files` rule, priority 85).
+- **All other verbs are default-closed** (the lowest-priority catch-all has `auth-private`). A new write verb is gated automatically — good — but a new *read* is not.
+
+The Go layer reads identity only from `X-authentik-*` headers the outpost injects (`/whoami`). Frontend `editable`/`canEdit` gating is **cosmetic** — the ingress is the actual trust boundary. Never rely on the SPA hiding a control to protect data.
+
 ## readOnlyRootFilesystem in prod
 
 In-cluster the container can only write to `/data` (the PVC). Code that writes elsewhere works locally but fails in prod. Keep SQLite (and its temp/WAL files) under `DB_PATH`, which lives in `/data`.
