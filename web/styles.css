@@ -90,6 +90,28 @@ main { flex: 1; min-height: 0; position: relative; }
 .catrow .count { font-size: 11px; color: var(--muted); white-space: nowrap; }
 .io { display: flex; gap: 9px; flex-wrap: wrap; margin: 6px 0 4px; }
 
+#view-trip { overflow: auto; display: none; }
+#view-trip.on { display: block; }
+.trip-inner { max-width: 640px; margin: 0 auto; padding: 18px 18px 60px; }
+.trip-inner .lead { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+.logi-hdr { display: flex; align-items: baseline; gap: 12px; margin: 26px 0 8px; }
+.logi-hdr h3 { font-family: "Fraunces", serif; font-weight: 500; font-size: 17px; margin: 0; }
+.logi-hdr .btn { margin-left: auto; }
+.logi { display: flex; gap: 12px; align-items: flex-start; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; margin-bottom: 9px; }
+.logi-glyph { flex: none; font-size: 17px; line-height: 1.3; opacity: .8; }
+.logi-body { flex: 1; min-width: 0; cursor: pointer; }
+.logi-hd { font-size: 14px; font-weight: 600; line-height: 1.2; }
+.logi-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.logi-when { font-size: 12.5px; margin-top: 4px; }
+.logi-nights { color: var(--muted); margin-left: 8px; }
+.logi-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap; }
+.logi-meta a { color: #2c8f96; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid currentColor; }
+.logi-note { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 5px; }
+.logi-x { flex: none; align-self: flex-start; color: var(--muted); font-size: 17px; line-height: 1; padding: 0 2px; cursor: pointer; }
+.logi-x:hover { color: #a3341f; }
+.fld-row { display: flex; gap: 10px; }
+.fld-row .fld { flex: 1; min-width: 0; }
+
 .scrim { position: absolute; inset: 0; background: rgba(28, 35, 33, .34); display: none; z-index: 1200; align-items: center; justify-content: center; padding: 16px; }
 .scrim.on { display: flex; }
 .modal { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; width: min(420px, 100%); padding: 18px; box-shadow: 0 20px 60px rgba(28, 35, 33, .3); }

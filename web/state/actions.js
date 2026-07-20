@@ -1,4 +1,4 @@
-import { cats, only, pins, toastMsg, trip, onMap } from "./signals.js";
+import { cats, editingLog, flights, only, pins, stays, toastMsg, trip, onMap } from "./signals.js";
 import { save } from "./persistence.js";
 import { freshState } from "./trips.js";
 
@@ -48,6 +48,36 @@ export function toggleCatalog(item) {
   toast(item.name + " added to the map");
 }
 
+export function saveFlight(fields, target) {
+  if (target) flights.value = flights.value.map((flight) => (flight.id === target.id ? { ...flight, ...fields } : flight));
+  else flights.value = [...flights.value, { id: "fl_" + Date.now().toString(36), ...fields }];
+  save();
+}
+
+export function removeFlight(id) {
+  const flight = flights.value.find((item) => item.id === id);
+  if (!flight || !confirm("Remove this flight?")) return;
+  flights.value = flights.value.filter((item) => item.id !== id);
+  save();
+}
+
+export function saveStay(fields, target) {
+  if (target) stays.value = stays.value.map((stay) => (stay.id === target.id ? { ...stay, ...fields } : stay));
+  else stays.value = [...stays.value, { id: "st_" + Date.now().toString(36), ...fields }];
+  save();
+}
+
+export function removeStay(id) {
+  const stay = stays.value.find((item) => item.id === id);
+  if (!stay || !confirm(`Remove “${stay.name}”?`)) return;
+  stays.value = stays.value.filter((item) => item.id !== id);
+  save();
+}
+
+export function editLog(kind, item) {
+  editingLog.value = { kind, item: item || null };
+}
+
 export function updateCat(id, patch) {
   cats.value = cats.value.map((category) => (category.id === id ? { ...category, ...patch } : category));
   save();
@@ -86,6 +116,8 @@ export function reset() {
   const state = freshState(trip.value);
   cats.value = state.categories;
   pins.value = state.pins;
+  flights.value = state.flights;
+  stays.value = state.stays;
   save();
   toast("Reset");
 }

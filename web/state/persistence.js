@@ -1,6 +1,13 @@
-import { cats, pins, trip } from "./signals.js";
+import { cats, flights, pins, stays, trip } from "./signals.js";
 
 const lsKey = (id) => "trip_state_" + id;
+
+const snapshot = () => JSON.stringify({
+  categories: cats.value,
+  pins: pins.value,
+  flights: flights.value,
+  stays: stays.value,
+});
 
 export function localLoad(id) {
   try {
@@ -16,13 +23,13 @@ let putTimer;
 
 export function save() {
   const id = trip.value.id;
-  const body = JSON.stringify({ categories: cats.value, pins: pins.value });
+  const body = snapshot();
   try { localStorage.setItem(lsKey(id), body); } catch (_) {}
   clearTimeout(putTimer);
   putTimer = setTimeout(() => pushState(body), 800);
 }
 
-async function pushState(body = JSON.stringify({ categories: cats.value, pins: pins.value })) {
+async function pushState(body = snapshot()) {
   if (body === lastSynced) return;
   try {
     const res = await fetch(`/state?trip=${trip.value.id}`, {
@@ -48,6 +55,8 @@ async function pullState() {
     lastSynced = text;
     cats.value = data.categories;
     pins.value = data.pins;
+    flights.value = Array.isArray(data.flights) ? data.flights : [];
+    stays.value = Array.isArray(data.stays) ? data.stays : [];
     try { localStorage.setItem(lsKey(trip.value.id), text); } catch (_) {}
     return true;
   } catch (_) {

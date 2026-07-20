@@ -1,11 +1,16 @@
 import { effect } from "@preact/signals";
-import { areasOn, catById, editing, only, pins, trip } from "../../state/signals.js";
+import { areasOn, catById, editing, only, pins, stays, trip } from "../../state/signals.js";
 
 const L = window.L;
 let map;
 let markerLayer;
+let stayLayer;
 let neighbourhoodLayer;
 const markers = {};
+
+const hasCoords = (place) => place
+  && place.lat != null && place.lng != null
+  && !Number.isNaN(+place.lat) && !Number.isNaN(+place.lng);
 
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"]/g, (character) => ({
   "&": "&amp;",
@@ -59,10 +64,8 @@ function renderMarkers() {
   });
 }
 
-function addBaseMarker(definition) {
-  if (!definition.base) return;
-  const base = definition.base;
-  const icon = L.divIcon({
+function homeIcon() {
+  return L.divIcon({
     className: "",
     iconSize: [34, 34],
     iconAnchor: [17, 33],
@@ -72,11 +75,20 @@ function addBaseMarker(definition) {
       <path d="M11.5 13.6 L17 9 L22.5 13.6 M13 12.7 V18 H21 V12.7" fill="none" stroke="#f3efe6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
     </svg></div>`,
   });
-  L.marker([base.lat, base.lng], { icon, zIndexOffset: 1000 }).addTo(map)
-    .bindPopup(`<div class="pop-tag" style="color:#1c2321">Your base</div>
-      <div class="pop-nm">${escapeHtml(base.name)}</div>
-      ${base.note ? `<p class="pop-nt">${escapeHtml(base.note)}</p>` : ""}
-      <div class="pop-links"><a href="${mapsUrl(base)}" target="_blank" rel="noopener">Open in Maps ↗</a></div>`);
+}
+
+// A stay with coordinates *is* the map's home marker — same thing, one source.
+function renderStays() {
+  if (!stayLayer) return;
+  stayLayer.clearLayers();
+  stays.value.forEach((stay) => {
+    if (!hasCoords(stay)) return;
+    L.marker([+stay.lat, +stay.lng], { icon: homeIcon(), zIndexOffset: 1000 }).addTo(stayLayer)
+      .bindPopup(`<div class="pop-tag" style="color:#1c2321">Your stay</div>
+        <div class="pop-nm">${escapeHtml(stay.name)}</div>
+        ${stay.address ? `<p class="pop-nt">${escapeHtml(stay.address)}</p>` : ""}
+        <div class="pop-links"><a href="${mapsUrl(stay)}" target="_blank" rel="noopener">Open in Maps ↗</a></div>`);
+  });
 }
 
 function buildNeighbourhoodLayer(definition) {
@@ -107,10 +119,11 @@ export function mountMap(element) {
     attribution: "&copy; OpenStreetMap, &copy; CARTO",
   }).addTo(map);
   map.setView(definition.center, definition.zoom);
-  addBaseMarker(definition);
   neighbourhoodLayer = buildNeighbourhoodLayer(definition);
+  stayLayer = L.layerGroup().addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   effect(renderMarkers);
+  effect(renderStays);
   effect(() => { areasOn.value ? neighbourhoodLayer.addTo(map) : map.removeLayer(neighbourhoodLayer); });
   fitAll();
 }
@@ -126,6 +139,6 @@ export function flyTo(pin) {
 
 function fitAll() {
   const points = pins.value.map((pin) => [pin.lat, pin.lng]);
-  if (trip.value.base) points.push([trip.value.base.lat, trip.value.base.lng]);
+  stays.value.forEach((stay) => { if (hasCoords(stay)) points.push([+stay.lat, +stay.lng]); });
   if (points.length) map.fitBounds(points, { padding: [50, 50], maxZoom: 15 });
 }
