@@ -2,7 +2,7 @@ import { html } from "htm/preact";
 import { tab, trip } from "../state/signals.js";
 import { invalidate } from "../features/map/leaflet.js";
 
-const TABS = [["map", "Map"], ["ideas", "Ideas"], ["setup", "Setup"]];
+const TABS = [["map", "Map"], ["trip", "Trip"], ["ideas", "Ideas"], ["setup", "Setup"]];
 
 export function Header() {
   const activeTrip = trip.value;

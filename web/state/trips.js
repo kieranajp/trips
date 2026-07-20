@@ -1,4 +1,4 @@
-import { cats, pins, trip, trips } from "./signals.js";
+import { cats, flights, pins, stays, trip, trips } from "./signals.js";
 import { localLoad } from "./persistence.js";
 
 const validId = (id) => /^[a-z0-9-]+$/.test(id || "");
@@ -16,7 +16,12 @@ export function freshState(def) {
       url: item.url,
       src: item.cid,
     }));
-  return { categories: def.categories.map((category) => ({ ...category })), pins: seededPins };
+  return {
+    categories: def.categories.map((category) => ({ ...category })),
+    pins: seededPins,
+    flights: (def.flights || []).map((flight) => ({ ...flight })),
+    stays: (def.stays || []).map((stay) => ({ ...stay })),
+  };
 }
 
 async function loadTrips() {
@@ -48,4 +53,6 @@ export async function boot() {
   const state = localLoad(id) || freshState(definition);
   cats.value = state.categories;
   pins.value = state.pins;
+  flights.value = state.flights || [];
+  stays.value = state.stays || [];
 }
