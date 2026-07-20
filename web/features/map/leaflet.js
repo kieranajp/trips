@@ -1,5 +1,6 @@
 import { effect } from "@preact/signals";
 import { areasOn, catById, editing, only, pins, stays, trip } from "../../state/signals.js";
+import { canEdit } from "../../state/auth.js";
 
 const L = window.L;
 let map;
@@ -40,7 +41,7 @@ function popupHtml(pin) {
     ${pin.note ? `<p class="pop-nt">${escapeHtml(pin.note)}</p>` : ""}
     <div class="pop-links">
       <a href="${mapsUrl(pin)}" target="_blank" rel="noopener">Open in Maps ↗</a>
-      <button data-edit="${pin.id}">Edit</button>
+      ${canEdit.value ? `<button data-edit="${pin.id}">Edit</button>` : ""}
     </div>`;
 }
 

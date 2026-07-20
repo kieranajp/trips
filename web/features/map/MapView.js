@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
 import { areasOn, cats, editing, only, pins, tab, trip } from "../../state/signals.js";
+import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
 import { flyTo, invalidate, mountMap } from "./leaflet.js";
 
@@ -49,12 +50,13 @@ function PinList() {
                 <div class="nm">${pin.name}</div>
                 ${pin.note ? html`<div class="nt">${truncate(pin.note, 90)}</div>` : null}
               </div>
-              <select class="picat" value=${pin.cat} title="Change category"
-                onClick=${(event) => event.stopPropagation()}
-                onChange=${(event) => savePin({ cat: event.currentTarget.value }, pin)}>
-                ${cats.value.map((item) => html`<option value=${item.id}>${item.name}</option>`)}
-              </select>
-              <span class="x" title="Remove" onClick=${(event) => { event.stopPropagation(); removePin(pin.id); }}>×</span>
+              ${canEdit.value ? html`
+                <select class="picat" value=${pin.cat} title="Change category"
+                  onClick=${(event) => event.stopPropagation()}
+                  onChange=${(event) => savePin({ cat: event.currentTarget.value }, pin)}>
+                  ${cats.value.map((item) => html`<option value=${item.id}>${item.name}</option>`)}
+                </select>
+                <span class="x" title="Remove" onClick=${(event) => { event.stopPropagation(); removePin(pin.id); }}>×</span>` : null}
             </div>`)}
         `;
       })}
@@ -73,7 +75,7 @@ export function MapView() {
         <h2>Your pins</h2>
         <div class="subtle">Tap a pin in the list to fly to it; tap a category below to show only that.</div>
         <div class="actionbar">
-          <button class="btn primary" title="Paste a Google Maps link to add a pin" onClick=${pinFromLink}>+ Paste Maps link</button>
+          ${canEdit.value ? html`<button class="btn primary" title="Paste a Google Maps link to add a pin" onClick=${pinFromLink}>+ Paste Maps link</button>` : null}
           ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle neighbourhood areas"
             onClick=${() => (areasOn.value = !areasOn.value)}>Areas: ${areasOn.value ? "on" : "off"}</button>` : null}
         </div>

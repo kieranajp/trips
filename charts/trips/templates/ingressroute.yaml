@@ -8,15 +8,40 @@ spec:
   entryPoints:
     - websecure
   routes:
-    # Authentik forward-auth callback (cross-namespace to the proxy outpost).
+    # 1. Authentik forward-auth callback + sign-out (cross-namespace to the
+    #    proxy outpost). No middleware — this path IS the auth machinery.
     - kind: Rule
+      priority: 100
       match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`/outpost.goauthentik.io/`)
       services:
         - name: ak-outpost-proxy
           namespace: auth
           port: 9000
-    # Everything else requires a valid Google session
+    # 2. Login trigger (/login) + auth-state probe (/whoami). These are GETs,
+    #    but must sit behind login: /login establishes the Authentik session,
+    #    and /whoami lets the SPA read who (if anyone) is logged in. Higher
+    #    priority than the public GET rule so these paths stay gated.
     - kind: Rule
+      priority: 90
+      match: Host(`{{ .Values.ingress.host }}`) && (Path(`/login`) || Path(`/whoami`))
+      middlewares:
+        - name: auth-private
+          namespace: auth
+      services:
+        - name: {{ .Release.Name }}
+          port: {{ .Values.app.service.port }}
+    # 3. Public reads: anyone can view the site and pull trip state. No auth.
+    - kind: Rule
+      priority: 80
+      match: Host(`{{ .Values.ingress.host }}`) && (Method(`GET`) || Method(`HEAD`) || Method(`OPTIONS`))
+      services:
+        - name: {{ .Release.Name }}
+          port: {{ .Values.app.service.port }}
+    # 4. Everything else — PUT (the only write today) plus any future
+    #    POST/PATCH/DELETE — requires a valid Google session. Default closed:
+    #    a new write verb is gated automatically without touching this file.
+    - kind: Rule
+      priority: 70
       match: Host(`{{ .Values.ingress.host }}`)
       middlewares:
         - name: auth-private

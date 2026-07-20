@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"database/sql"
 	"embed"
+	"encoding/json"
 	"io"
 	"io/fs"
 	"log"
@@ -47,6 +48,36 @@ func main() {
 	}
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
+
+	// /whoami and /login only ever reach the app through the auth-private
+	// ingress route, so a request arriving here has already cleared Authentik
+	// forward-auth. The identity comes from the X-authentik-* headers the
+	// outpost injects; reads (public routes) never hit these handlers.
+
+	// /whoami lets the SPA discover its login state. The ingress routes this
+	// path through forward-auth, so logged-out browsers get a 302 (which the
+	// SPA reads as "logged out" via fetch redirect:manual) and logged-in ones
+	// get this JSON back with their Authentik identity.
+	http.HandleFunc("/whoami", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-store")
+		json.NewEncoder(w).Encode(map[string]string{
+			"user": r.Header.Get("X-authentik-email"),
+			"name": r.Header.Get("X-authentik-username"),
+		})
+	})
+
+	// /login is the login trigger. Visiting it forces the forward-auth flow
+	// (Authentik + Google), which sets the session cookie; the handler then
+	// bounces the browser back to where it came from so subsequent writes carry
+	// the session. next is constrained to a local path to avoid open redirects.
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		next := r.URL.Query().Get("next")
+		if !strings.HasPrefix(next, "/") || strings.HasPrefix(next, "//") {
+			next = "/"
+		}
+		http.Redirect(w, r, next, http.StatusFound)
+	})
 
 	http.HandleFunc("/state", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
