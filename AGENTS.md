@@ -12,8 +12,10 @@ The app/repo is `trips`. `bilbao` is one *trip id*. `web/trips/bilbao.json`, the
 
 ## Two kinds of "data" — never conflate them
 
-- **Trip definitions** — static JSON in `web/trips/*.json`, committed. The *seed*: catalogue, categories, base marker, neighbourhoods.
-- **User state** — pins + categories, per trip, in SQLite (`/state?trip=<id>`) and localStorage (`trip_state_<id>`). **Not in the repo.**
+- **Trip definitions** — static JSON in `web/trips/*.json`, committed. The *seed*: catalogue, categories, neighbourhoods, and the starting flights/stays.
+- **User state** — pins, categories, flights and stays, per trip, in SQLite (`/state?trip=<id>`) and localStorage (`trip_state_<id>`). **Not in the repo.**
+
+There is no separate "base" marker any more: the map's home pin(s) render from whichever **stays** carry `lat`/`lng`. A stay and its map marker are one and the same.
 
 Editing `bilbao.json` changes the seed for a *fresh* trip. It does **not** touch a user whose state has already diverged (they load from their saved state, not the seed).
 

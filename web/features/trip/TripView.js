@@ -45,6 +45,7 @@ function StayCard({ stay }) {
         <div class="logi-meta">
           ${stay.confirmation ? html`<span>Ref ${stay.confirmation}</span>` : null}
           ${stay.url ? html`<a href=${stay.url} target="_blank" rel="noopener" onClick=${(event) => event.stopPropagation()}>Booking ↗</a>` : null}
+          ${stay.lat != null && stay.lng != null ? html`<span>📍 On the map</span>` : null}
         </div>
         ${stay.note ? html`<div class="logi-note">${stay.note}</div>` : null}
       </div>

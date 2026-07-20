@@ -30,13 +30,16 @@ const FIELDS = {
     full: [
       ["name", "Name", "text", "e.g. Hotel Hesperia Bilbao"],
       ["address", "Address", "text", "Street, area"],
+      ["coords", "Location (lat, lng)", "text", "43.2678, -2.9281 — optional, drops it on the map"],
       ["confirmation", "Booking reference", "text", "e.g. HB-4471902"],
       ["url", "Booking link", "url", "https://…"],
       ["note", "Note", "textarea", "Breakfast, parking, key collection…"],
     ],
-    fullFirst: ["name", "address"],
+    fullFirst: ["name", "address", "coords"],
     required: ["name"],
     requiredMsg: "Give it a name",
+    // "coords" is a "lat, lng" text field parsed into numeric lat/lng on save.
+    coords: true,
     save: saveStay,
     remove: removeStay,
   },
@@ -58,7 +61,13 @@ function LogisticsForm({ edit }) {
   const config = FIELDS[edit.kind];
   const item = edit.item;
   const [values, setValues] = useState({});
-  useEffect(() => { setValues({ ...(item || {}) }); }, [edit]);
+  useEffect(() => {
+    const initial = { ...(item || {}) };
+    if (config.coords && item && item.lat != null && item.lng != null) {
+      initial.coords = `${item.lat}, ${item.lng}`;
+    }
+    setValues(initial);
+  }, [edit]);
   const set = (key, value) => setValues((current) => ({ ...current, [key]: value }));
   const get = (key) => values[key] || "";
 
@@ -68,6 +77,18 @@ function LogisticsForm({ edit }) {
     const fields = {};
     const allKeys = [...(config.fullFirst || []), ...config.rows.flat().map((s) => s[0]), ...config.full.map((s) => s[0])];
     allKeys.forEach((key) => { fields[key] = get(key).trim(); });
+    if (config.coords) {
+      const raw = (fields.coords || "").trim();
+      delete fields.coords;
+      if (raw) {
+        const parts = raw.split(",").map((value) => parseFloat(value.trim()));
+        if (parts.length !== 2 || parts.some(Number.isNaN)) { toast("Coordinates need to be: lat, lng"); return; }
+        [fields.lat, fields.lng] = parts;
+      } else {
+        fields.lat = null;
+        fields.lng = null;
+      }
+    }
     config.save(fields, item);
     close();
   };

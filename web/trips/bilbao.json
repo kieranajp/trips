@@ -13,13 +13,6 @@
     43.263,
     -2.935
   ],
-  "base": {
-    "name": "Hotel Hesperia Bilbao",
-    "lat": 43.2678833,
-    "lng": -2.928129,
-    "url": "https://maps.google.com/?cid=9292624536039691993",
-    "note": "Campo de Volantín, right bank by the Zubizuri footbridge. Guggenheim's a short riverside walk NW; hop a bridge south for the Casco Viejo."
-  },
   "flights": [
     {
       "airline": "easyJet",
@@ -45,11 +38,13 @@
     {
       "name": "Hotel Hesperia Bilbao",
       "address": "Campo de Volantín 28, Bilbao",
+      "lat": 43.2678833,
+      "lng": -2.928129,
       "checkIn": "2026-09-10T15:00",
       "checkOut": "2026-09-14T12:00",
       "confirmation": "HB-4471902",
       "url": "https://maps.google.com/?cid=9292624536039691993",
-      "note": "Right bank by the Zubizuri footbridge. Ask for a river-side room."
+      "note": "Campo de Volantín, right bank by the Zubizuri footbridge. Guggenheim's a short riverside walk NW; hop a bridge south for the Casco Viejo. Ask for a river-side room."
     }
   ],
   "categories": [
