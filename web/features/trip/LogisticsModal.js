@@ -1,6 +1,6 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { html } from "htm/preact";
-import { editingLog } from "../../state/signals.js";
+import { editingLog, trip } from "../../state/signals.js";
 import { removeFlight, removeStay, saveFlight, saveStay, toast } from "../../state/actions.js";
 import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
 
@@ -60,16 +60,81 @@ function Field({ spec, value, onInput }) {
     </div>`;
 }
 
+// Boarding passes attach to a flight: the blob lives in the /files store, and
+// the flight carries lightweight refs ({id,name,type}) in its state. Uploads
+// hit /files immediately (need auth), so cancelling a new flight can orphan a
+// blob — harmless, gated, tiny. ponytail: leave orphans, sweep only if it bites.
+function BoardingPassTab({ passes, setPasses }) {
+  const fileRef = useRef();
+  const [big, setBig] = useState(null);
+  const tripId = trip.value.id;
+  const url = (pass) => `/files?trip=${tripId}&id=${pass.id}`;
+  const isImg = (pass) => (pass.type || "").startsWith("image/");
+
+  async function upload(list) {
+    const added = [];
+    for (const file of list) {
+      const res = await fetch(`/files?trip=${tripId}&name=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file,
+      });
+      if (res.ok) added.push({ id: (await res.json()).id, name: file.name, type: file.type || "" });
+    }
+    if (added.length) setPasses([...passes, ...added]);
+  }
+
+  async function remove(pass) {
+    if (!confirm(`Remove “${pass.name}”?`)) return;
+    await fetch(url(pass), { method: "DELETE" });
+    setPasses(passes.filter((item) => item.id !== pass.id));
+  }
+
+  return html`
+    <div>
+      <div class="maps-fill">
+        <button class="btn" onClick=${() => fileRef.current.click()}>⬆ Upload boarding pass</button>
+        <span class="hint">Image or PDF. Tap a pass to enlarge it.</span>
+      </div>
+      <input ref=${fileRef} type="file" accept="image/*,application/pdf,.pdf" multiple hidden
+        onChange=${(event) => { if (event.target.files.length) upload([...event.target.files]); event.target.value = ""; }}/>
+      ${passes.length ? html`
+        <div class="pass-list">
+          ${passes.map((pass) => html`
+            <div class="pass-row" key=${pass.id}>
+              <button class="pass-open" onClick=${() => setBig(pass)}>
+                ${isImg(pass) ? html`<img src=${url(pass)} alt=${pass.name}/>` : html`<span class="pass-ico">📄</span>`}
+                <span class="pass-name">${pass.name || "boarding pass"}</span>
+              </button>
+              <span class="logi-x" title="Remove" onClick=${() => remove(pass)}>×</span>
+            </div>`)}
+        </div>`
+        : html`<div class="empty">No boarding pass yet.</div>`}
+      ${big ? html`
+        <div class="lightbox" onClick=${(event) => { if (event.target.classList.contains("lightbox")) setBig(null); }}>
+          <span class="lightbox-x" onClick=${() => setBig(null)}>×</span>
+          ${isImg(big)
+            ? html`<img src=${url(big)} alt=${big.name}/>`
+            : html`<iframe src=${url(big)} title=${big.name}></iframe>`}
+        </div>` : null}
+    </div>`;
+}
+
 function LogisticsForm({ edit }) {
   const config = FIELDS[edit.kind];
   const item = edit.item;
+  const isFlight = edit.kind === "flight";
   const [values, setValues] = useState({});
+  const [passes, setPasses] = useState([]);
+  const [pane, setPane] = useState("details");
   useEffect(() => {
     const initial = { ...(item || {}) };
     if (config.coords && item && item.lat != null && item.lng != null) {
       initial.coords = `${item.lat}, ${item.lng}`;
     }
     setValues(initial);
+    setPasses((item && item.passes) || []);
+    setPane("details");
   }, [edit]);
   const set = (key, value) => setValues((current) => ({ ...current, [key]: value }));
   const get = (key) => values[key] || "";
@@ -105,6 +170,7 @@ function LogisticsForm({ edit }) {
         fields.lng = null;
       }
     }
+    if (isFlight) fields.passes = passes;
     config.save(fields, item);
     close();
   };
@@ -115,17 +181,26 @@ function LogisticsForm({ edit }) {
   return html`
     <div class="modal">
       <h3>${item ? "Edit " + config.title : "Add " + config.title}</h3>
-      ${config.mapsLink ? html`
-        <div class="maps-fill">
-          <button class="btn" onClick=${fromMapsLink}>📍 Fill from Google Maps link</button>
-          <span class="hint">Paste a place link — pulls in the name, location and map pin. Then add your dates below.</span>
+      ${isFlight ? html`
+        <div class="tabs">
+          <button class=${"tab" + (pane === "details" ? " on" : "")} onClick=${() => setPane("details")}>Details</button>
+          <button class=${"tab" + (pane === "pass" ? " on" : "")} onClick=${() => setPane("pass")}>Boarding pass${passes.length ? ` (${passes.length})` : ""}</button>
         </div>` : null}
-      ${firstSpecs.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
-      ${config.rows.map((row, index) => html`
-        <div class="fld-row" key=${index}>
-          ${row.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
-        </div>`)}
-      ${restFull.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
+      ${isFlight && pane === "pass"
+        ? html`<${BoardingPassTab} passes=${passes} setPasses=${setPasses}/>`
+        : html`<div>
+            ${config.mapsLink ? html`
+              <div class="maps-fill">
+                <button class="btn" onClick=${fromMapsLink}>📍 Fill from Google Maps link</button>
+                <span class="hint">Paste a place link — pulls in the name, location and map pin. Then add your dates below.</span>
+              </div>` : null}
+            ${firstSpecs.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
+            ${config.rows.map((row, index) => html`
+              <div class="fld-row" key=${index}>
+                ${row.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
+              </div>`)}
+            ${restFull.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
+          </div>`}
       <div class="modal-act">
         ${item ? html`<button class="btn ghost del" style="color:#a3341f" onClick=${() => { config.remove(item.id); close(); }}>Delete</button>` : null}
         <span class="spacer"></span>

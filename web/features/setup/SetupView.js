@@ -1,52 +1,9 @@
-import { useRef, useState, useEffect } from "preact/hooks";
+import { useRef } from "preact/hooks";
 import { html } from "htm/preact";
-import { cats, pins, tab, trip } from "../../state/signals.js";
+import { cats, pins, tab } from "../../state/signals.js";
 import { canEdit, login } from "../../state/auth.js";
 import { addCat, deleteCat, reset, updateCat } from "../../state/actions.js";
 import { exportJson, importFile } from "./import-export.js";
-
-function BoardingPasses() {
-  const fileRef = useRef();
-  const [files, setFiles] = useState([]);
-  const id = trip.value.id;
-  const load = () =>
-    fetch(`/files?trip=${id}`).then((res) => (res.ok ? res.json() : [])).then(setFiles).catch(() => {});
-  useEffect(() => { load(); }, [id]);
-
-  async function upload(list) {
-    for (const file of list) {
-      await fetch(`/files?trip=${id}&name=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-        body: file,
-      });
-    }
-    load();
-  }
-
-  async function remove(fileId, name) {
-    if (!confirm(`Remove “${name}”?`)) return;
-    await fetch(`/files?trip=${id}&id=${fileId}`, { method: "DELETE" });
-    load();
-  }
-
-  return html`
-    <h3>Boarding passes & docs</h3>
-    <p class="hint">Attach boarding passes, tickets or any trip doc (image or PDF) so it's all in one place. Stored with this trip — up to 10MB each, not parsed.</p>
-    <div class="io">
-      <button class="btn" onClick=${() => fileRef.current.click()}>Upload file</button>
-      <input ref=${fileRef} type="file" accept="image/*,application/pdf,.pdf" multiple hidden
-        onChange=${(event) => { if (event.target.files.length) upload([...event.target.files]); event.target.value = ""; }}/>
-    </div>
-    ${files.length > 0 && html`
-      <div style="margin-top:10px">
-        ${files.map((file) => html`
-          <div class="catrow">
-            <a class="btn mini ghost" style="flex:1;text-align:left;text-decoration:none" href=${`/files?trip=${id}&id=${file.id}`} target="_blank" rel="noopener">📄 ${file.name || "file"}</a>
-            <button class="btn mini ghost" style="color:#a3341f" onClick=${() => remove(file.id, file.name)}>✕</button>
-          </div>`)}
-      </div>`}`;
-}
 
 export function SetupView() {
   const fileRef = useRef();
@@ -106,8 +63,6 @@ export function SetupView() {
         ${editable ? html`<p class="hint" style="margin-top:10px"><strong>Google Takeout saves:</strong> export a Saved list's CSV and import it here. The CSV has no coordinates, so each place is geocoded by name (one per second) and lands in the “Saved” category — anything that mislocates, just edit it. (Our own JSON export round-trips everything, categories included.)</p>` : null}
 
         ${editable ? html`
-          <${BoardingPasses}/>
-
           <h3>Reset</h3>
           <p class="hint">Wipes this trip's pins and categories back to the seeded set.</p>
           <button class="btn ghost" style="color:#a3341f;border-color:rgba(163,52,31,.4)" onClick=${reset}>Reset everything</button>` : null}
