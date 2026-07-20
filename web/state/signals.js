@@ -7,7 +7,6 @@ export const pins = signal([]);
 export const only = signal(null);
 export const tab = signal("map");
 export const areasOn = signal(true);
-export const placing = signal(false);
 export const editing = signal(null);
 export const toastMsg = signal("");
 

@@ -6,12 +6,12 @@ import { removePin, savePin, toast } from "../state/actions.js";
 function PinForm({ edit }) {
   const pin = edit.pin;
   const location = pin ? { lat: pin.lat, lng: pin.lng } : edit.latlng;
-  const [name, setName] = useState(pin?.name || "");
+  const [name, setName] = useState(pin?.name || edit.name || "");
   const [category, setCategory] = useState(pin?.cat || cats.value[0].id);
   const [note, setNote] = useState(pin?.note || "");
   const [coords, setCoords] = useState(location ? `${(+location.lat).toFixed(6)}, ${(+location.lng).toFixed(6)}` : "");
   useEffect(() => {
-    setName(pin?.name || "");
+    setName(pin?.name || edit.name || "");
     setCategory(pin?.cat || cats.value[0].id);
     setNote(pin?.note || "");
     setCoords(location ? `${(+location.lat).toFixed(6)}, ${(+location.lng).toFixed(6)}` : "");
@@ -24,7 +24,9 @@ function PinForm({ edit }) {
       toast("Coordinates need to be: lat, lng");
       return;
     }
-    savePin({ name: name.trim(), cat: category, note: note.trim(), lat: parsed[0], lng: parsed[1] }, pin);
+    const fields = { name: name.trim(), cat: category, note: note.trim(), lat: parsed[0], lng: parsed[1] };
+    if (!pin && edit.url) fields.url = edit.url;
+    savePin(fields, pin);
     close();
   };
   return html`

@@ -1,10 +1,21 @@
 import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
-import { areasOn, cats, editing, only, pins, placing, tab, trip } from "../../state/signals.js";
-import { removePin, savePin, toggleOnly } from "../../state/actions.js";
-import { flyTo, getCenter, invalidate, mountMap } from "./leaflet.js";
+import { areasOn, cats, editing, only, pins, tab, trip } from "../../state/signals.js";
+import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
+import { flyTo, invalidate, mountMap } from "./leaflet.js";
 
 const truncate = (text, length) => text.length > length ? text.slice(0, length - 1) + "…" : text;
+
+function pinFromLink() {
+  const link = prompt("Paste a Google Maps link");
+  if (!link) return;
+  const coords = link.match(/!3d(-?\d[\d.]*)!4d(-?\d[\d.]*)/)
+    || link.match(/@(-?\d[\d.]*),(-?\d[\d.]*)/)
+    || link.match(/[?&](?:q|query)=(-?\d[\d.]*),(-?\d[\d.]*)/);
+  if (!coords) { toast("No coordinates in that link — open the place in Google Maps and copy the full URL (short links won't work)"); return; }
+  const name = decodeURIComponent(link.match(/\/place\/([^/@]+)/)?.[1] || "").replace(/\+/g, " ");
+  editing.value = { latlng: { lat: +coords[1], lng: +coords[2] }, name, url: link };
+}
 
 function Filters() {
   return html`
@@ -62,9 +73,7 @@ export function MapView() {
         <h2>Your pins</h2>
         <div class="subtle">Tap a pin in the list to fly to it; tap a category below to show only that.</div>
         <div class="actionbar">
-          <button class=${"btn primary" + (placing.value ? " armed" : "")}
-            onClick=${() => (placing.value = !placing.value)}>${placing.value ? "Click the map…" : "+ Add pin"}</button>
-          <button class="btn" title="Add at map centre" onClick=${() => (editing.value = { latlng: getCenter() })}>Add at centre</button>
+          <button class="btn primary" title="Paste a Google Maps link to add a pin" onClick=${pinFromLink}>+ Paste Maps link</button>
           ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle neighbourhood areas"
             onClick=${() => (areasOn.value = !areasOn.value)}>Areas: ${areasOn.value ? "on" : "off"}</button>` : null}
         </div>

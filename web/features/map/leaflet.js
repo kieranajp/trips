@@ -1,5 +1,5 @@
 import { effect } from "@preact/signals";
-import { areasOn, catById, editing, only, pins, placing, trip } from "../../state/signals.js";
+import { areasOn, catById, editing, only, pins, trip } from "../../state/signals.js";
 
 const L = window.L;
 let map;
@@ -110,23 +110,13 @@ export function mountMap(element) {
   addBaseMarker(definition);
   neighbourhoodLayer = buildNeighbourhoodLayer(definition);
   markerLayer = L.layerGroup().addTo(map);
-  map.on("click", (event) => {
-    if (!placing.value) return;
-    placing.value = false;
-    editing.value = { latlng: event.latlng };
-  });
   effect(renderMarkers);
   effect(() => { areasOn.value ? neighbourhoodLayer.addTo(map) : map.removeLayer(neighbourhoodLayer); });
-  effect(() => { map.getContainer().style.cursor = placing.value ? "crosshair" : ""; });
   fitAll();
 }
 
 export function invalidate() {
   if (map) setTimeout(() => map.invalidateSize(), 60);
-}
-
-export function getCenter() {
-  return map.getCenter();
 }
 
 export function flyTo(pin) {
