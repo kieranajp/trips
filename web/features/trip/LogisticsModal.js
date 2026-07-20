@@ -2,6 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { html } from "htm/preact";
 import { editingLog } from "../../state/signals.js";
 import { removeFlight, removeStay, saveFlight, saveStay, toast } from "../../state/actions.js";
+import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
 
 // Field specs per kind: [key, label, inputType, placeholder]. The order here
 // is the order they render, so adding a logistics type is just a new list.
@@ -40,6 +41,8 @@ const FIELDS = {
     requiredMsg: "Give it a name",
     // "coords" is a "lat, lng" text field parsed into numeric lat/lng on save.
     coords: true,
+    // Autofill name/coords/link by pasting a Google Maps link, like pins.
+    mapsLink: true,
     save: saveStay,
     remove: removeStay,
   },
@@ -71,6 +74,19 @@ function LogisticsForm({ edit }) {
   const set = (key, value) => setValues((current) => ({ ...current, [key]: value }));
   const get = (key) => values[key] || "";
 
+  const fromMapsLink = () => {
+    const link = prompt("Paste a Google Maps link for where you're staying");
+    if (!link) return;
+    const place = parseMapsLink(link);
+    if (!place) { toast(MAPS_LINK_HINT); return; }
+    setValues((current) => ({
+      ...current,
+      name: current.name || place.name,
+      coords: `${place.lat}, ${place.lng}`,
+      url: place.url,
+    }));
+  };
+
   const close = () => (editingLog.value = null);
   const submit = () => {
     if (config.required.some((key) => !get(key).trim())) { toast(config.requiredMsg); return; }
@@ -99,6 +115,11 @@ function LogisticsForm({ edit }) {
   return html`
     <div class="modal">
       <h3>${item ? "Edit " + config.title : "Add " + config.title}</h3>
+      ${config.mapsLink ? html`
+        <div class="maps-fill">
+          <button class="btn" onClick=${fromMapsLink}>📍 Fill from Google Maps link</button>
+          <span class="hint">Paste a place link — pulls in the name, location and map pin. Then add your dates below.</span>
+        </div>` : null}
       ${firstSpecs.map((spec) => html`<${Field} key=${spec[0]} spec=${spec} value=${get(spec[0])} onInput=${set}/>`)}
       ${config.rows.map((row, index) => html`
         <div class="fld-row" key=${index}>

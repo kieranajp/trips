@@ -111,6 +111,9 @@ main { flex: 1; min-height: 0; position: relative; }
 .logi-x:hover { color: #a3341f; }
 .fld-row { display: flex; gap: 10px; }
 .fld-row .fld { flex: 1; min-width: 0; }
+.maps-fill { margin-bottom: 14px; }
+.maps-fill .btn { width: 100%; }
+.maps-fill .hint { display: block; font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 6px; }
 
 .scrim { position: absolute; inset: 0; background: rgba(28, 35, 33, .34); display: none; z-index: 1200; align-items: center; justify-content: center; padding: 16px; }
 .scrim.on { display: flex; }
