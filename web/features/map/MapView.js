@@ -3,6 +3,7 @@ import { html } from "htm/preact";
 import { areasOn, cats, editing, only, pins, tab, trip } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
+import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
 import { flyTo, invalidate, mountMap } from "./leaflet.js";
 
 const truncate = (text, length) => text.length > length ? text.slice(0, length - 1) + "…" : text;
@@ -10,12 +11,9 @@ const truncate = (text, length) => text.length > length ? text.slice(0, length -
 function pinFromLink() {
   const link = prompt("Paste a Google Maps link");
   if (!link) return;
-  const coords = link.match(/!3d(-?\d[\d.]*)!4d(-?\d[\d.]*)/)
-    || link.match(/@(-?\d[\d.]*),(-?\d[\d.]*)/)
-    || link.match(/[?&](?:q|query)=(-?\d[\d.]*),(-?\d[\d.]*)/);
-  if (!coords) { toast("No coordinates in that link — open the place in Google Maps and copy the full URL (short links won't work)"); return; }
-  const name = decodeURIComponent(link.match(/\/place\/([^/@]+)/)?.[1] || "").replace(/\+/g, " ");
-  editing.value = { latlng: { lat: +coords[1], lng: +coords[2] }, name, url: link };
+  const place = parseMapsLink(link);
+  if (!place) { toast(MAPS_LINK_HINT); return; }
+  editing.value = { latlng: { lat: place.lat, lng: place.lng }, name: place.name, url: place.url };
 }
 
 function Filters() {
