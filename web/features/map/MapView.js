@@ -5,6 +5,7 @@ import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
 import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
 import { flyTo, invalidate, mountMap } from "./leaflet.js";
+import { initSheet } from "./sheet.js";
 
 const truncate = (text, length) => text.length > length ? text.slice(0, length - 1) + "…" : text;
 
@@ -67,13 +68,18 @@ function PinList() {
 
 export function MapView() {
   const mapRef = useRef();
+  const viewRef = useRef();
+  const sideRef = useRef();
+  const handleRef = useRef();
   useEffect(() => { mountMap(mapRef.current); }, []);
+  useEffect(() => initSheet(viewRef.current, sideRef.current, handleRef.current), []);
   useEffect(() => { if (tab.value === "map") invalidate(); }, [tab.value]);
   const hasNeighbourhoods = trip.value.neighbourhoods?.length;
   return html`
-    <section class=${"view" + (tab.value === "map" ? " on" : "")} id="view-map">
+    <section class=${"view" + (tab.value === "map" ? " on" : "")} id="view-map" ref=${viewRef}>
       <div id="map" ref=${mapRef}></div>
-      <aside class="side">
+      <aside class="side" ref=${sideRef}>
+        <div class="sheet-handle" ref=${handleRef} title="Drag to resize" aria-label="Drag to resize the panel"><span></span></div>
         <h2>Your pins</h2>
         <div class="subtle">Tap a pin in the list to fly to it; tap a category below to show only that.</div>
         <div class="actionbar">

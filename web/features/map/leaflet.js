@@ -134,6 +134,12 @@ export function invalidate() {
   if (map) setTimeout(() => map.invalidateSize(), 60);
 }
 
+// Immediate size recalculation — used while dragging the mobile sheet, where a
+// deferred invalidate would lag the gesture.
+export function resizeMap() {
+  if (map) map.invalidateSize();
+}
+
 export function flyTo(pin) {
   map.setView([pin.lat, pin.lng], 16);
   markers[pin.id]?.openPopup();
