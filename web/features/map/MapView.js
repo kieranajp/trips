@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
-import { areasOn, cats, editing, only, pins, tab, trip } from "../../state/signals.js";
+import { areasOn, cats, editing, only, pinMatches, pins, search, tab, trip } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
 import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
@@ -21,7 +21,7 @@ function Filters() {
     <div class="filters">
       <span class="flabel">${only.value ? "Showing one — tap again for all" : "Tap to show only"}</span>
       ${cats.value.map((category) => {
-        const count = pins.value.filter((pin) => pin.cat === category.id).length;
+        const count = pins.value.filter((pin) => pin.cat === category.id && pinMatches(pin, search.value)).length;
         const active = only.value === category.id;
         return html`<span class=${"chip" + (active ? " on" : "") + (only.value && !active ? " off" : "")}
           title="Show only this" onClick=${() => toggleOnly(category.id)}>
@@ -31,9 +31,13 @@ function Filters() {
 }
 
 function PinList() {
-  const visible = only.value ? pins.value.filter((pin) => pin.cat === only.value) : pins.value;
+  const visible = pins.value.filter((pin) =>
+    (!only.value || pin.cat === only.value) && pinMatches(pin, search.value));
   if (!visible.length) {
-    return html`<div class="pinlist"><div class="empty">No pins to show. Add one, or grab some from the Ideas tab.</div></div>`;
+    const empty = search.value.trim()
+      ? html`<div class="empty">No pins match “${search.value.trim()}”.</div>`
+      : html`<div class="empty">No pins to show. Add one, or grab some from the Ideas tab.</div>`;
+    return html`<div class="pinlist">${empty}</div>`;
   }
   return html`
     <div class="pinlist">
@@ -76,6 +80,11 @@ export function MapView() {
           ${canEdit.value ? html`<button class="btn primary" title="Paste a Google Maps link to add a pin" onClick=${pinFromLink}>+ Paste Maps link</button>` : null}
           ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle neighbourhood areas"
             onClick=${() => (areasOn.value = !areasOn.value)}>Areas: ${areasOn.value ? "on" : "off"}</button>` : null}
+        </div>
+        <div class="pinsearch">
+          <input type="search" placeholder="Search pins & notes…"
+            value=${search.value} onInput=${(event) => (search.value = event.target.value)}/>
+          ${search.value ? html`<button class="clear" title="Clear search" onClick=${() => (search.value = "")}>×</button>` : null}
         </div>
         <${Filters}/>
         <${PinList}/>

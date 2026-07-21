@@ -1,5 +1,5 @@
 import { effect } from "@preact/signals";
-import { areasOn, catById, editing, only, pins, stays, trip } from "../../state/signals.js";
+import { areasOn, catById, editing, only, pinMatches, pins, search, stays, trip } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 
 const L = window.L;
@@ -51,6 +51,7 @@ function renderMarkers() {
   for (const id in markers) delete markers[id];
   pins.value.forEach((pin) => {
     if (only.value && pin.cat !== only.value) return;
+    if (!pinMatches(pin, search.value)) return;
     const category = catById(pin.cat);
     const marker = L.marker([pin.lat, pin.lng], { icon: pinIcon(category.color) }).addTo(markerLayer);
     marker.bindPopup(popupHtml(pin));
