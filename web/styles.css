@@ -35,6 +35,7 @@ main { flex: 1; min-height: 0; position: relative; }
 #view-map { flex-direction: row; }
 #map { flex: 1; min-width: 0; height: 100%; background: var(--panel); z-index: 0; }
 .side { flex: none; width: 320px; max-width: 42vw; border-left: 1px solid var(--line); display: flex; flex-direction: column; background: var(--paper); }
+.sheet-handle { display: none; }
 .side h2 { font-family: "Fraunces", serif; font-weight: 500; font-size: 15px; margin: 0; padding: 13px 15px 4px; }
 .side .subtle { font-size: 11px; color: var(--muted); padding: 0 15px 10px; line-height: 1.4; }
 .actionbar { padding: 0 15px 11px; display: flex; gap: 7px; flex-wrap: wrap; }
@@ -164,8 +165,20 @@ main { flex: 1; min-height: 0; position: relative; }
 
 @media (max-width: 720px) {
   #view-map { flex-direction: column; }
-  #map { height: 52%; }
-  .side { width: 100%; max-width: none; border-left: none; border-top: 1px solid var(--line); height: 48%; }
+  #map { flex: 1; min-height: 0; height: auto; }
+  .side {
+    flex: none; width: 100%; max-width: none; height: 58%;
+    border-left: none; border-top: 1px solid var(--line);
+    border-radius: 14px 14px 0 0; margin-top: -14px;
+    background: var(--paper); box-shadow: 0 -6px 22px rgba(28, 35, 33, .16); z-index: 1;
+  }
+  .side h2 { padding-top: 2px; }
+  .sheet-handle {
+    display: flex; align-items: center; justify-content: center; flex: none;
+    height: 26px; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none;
+  }
+  .sheet-handle:active { cursor: grabbing; }
+  .sheet-handle span { width: 40px; height: 4px; border-radius: 2px; background: var(--muted); opacity: .5; }
 }
 
 /* Auth control (header) + read-only affordances */
