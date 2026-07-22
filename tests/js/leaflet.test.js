@@ -1,7 +1,7 @@
 import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { authUser } from "../../web/state/auth.js";
-import { areasOn, cats, editing, only, pins, search, stays } from "../../web/state/signals.js";
+import { areasOn, cats, editing, only, pins, search, stays, trip } from "../../web/state/signals.js";
 import { createTripMap } from "../../web/features/map/leaflet.js";
 
 // A recording fake of the slice of the Leaflet API createTripMap touches.
@@ -95,6 +95,7 @@ beforeEach(() => {
   areasOn.value = true;
   editing.value = null;
   authUser.value = null;
+  trip.value = null;
 });
 
 test("mount sets the initial view and renders a marker per pin", () => {
@@ -169,14 +170,36 @@ test("the areas toggle adds and removes the neighbourhood layer", () => {
   assert.ok(map.layers.has(neighbourhoods));
 });
 
+// Stand-in for the popup's DOM: one element per data-attribute button.
+const fakePopupContent = (buttons) => ({
+  popup: { _contentNode: { querySelector: (selector) => buttons[selector] || null } },
+});
+
 test("the popup Edit button closes the popup and opens the pin editor", () => {
   const { map, markerGroup } = mount();
   const marker = markerGroup.items[0];
   const button = {};
-  marker.events.popupopen({ popup: { _contentNode: { querySelector: () => button } } });
+  marker.events.popupopen(fakePopupContent({ "[data-edit]": button }));
   button.onclick();
   assert.equal(map.popupsClosed, 1);
   assert.equal(editing.value.pin.id, "p_1");
+});
+
+test("the popup Share button hands the visitor a permalink (prompt fallback in Node)", async () => {
+  trip.value = { id: "bilbao" };
+  globalThis.location = { origin: "https://trips.example", pathname: "/" };
+  const prompts = [];
+  globalThis.prompt = (_message, url) => { prompts.push(url); };
+  try {
+    const { markerGroup } = mount();
+    const button = {};
+    markerGroup.items[0].events.popupopen(fakePopupContent({ "[data-share]": button }));
+    await button.onclick(); // Node's navigator has no share/clipboard → prompt
+    assert.deepEqual(prompts, ["https://trips.example/?trip=bilbao&pin=p_1"]);
+  } finally {
+    delete globalThis.location;
+    delete globalThis.prompt;
+  }
 });
 
 test("destroy disposes the effects and removes the map", () => {

@@ -20,6 +20,7 @@ export function pinPopupHtml(pin) {
     ${pin.note ? `<p class="pop-nt">${escapeHtml(pin.note)}</p>` : ""}
     <div class="pop-links">
       <a href="${escapeHtml(mapsUrl(pin))}" target="_blank" rel="noopener">Open in Maps ↗</a>
+      <button data-share="${escapeHtml(pin.id)}">Share</button>
       ${canEdit.value ? `<button data-edit="${escapeHtml(pin.id)}">Edit</button>` : ""}
     </div>`;
 }
