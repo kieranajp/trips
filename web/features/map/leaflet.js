@@ -24,7 +24,7 @@ function pinIcon(color) {
   return L.divIcon({
     className: "",
     iconSize: [26, 26],
-    iconAnchor: [13, 26],
+    iconAnchor: [13, 25],
     popupAnchor: [0, -24],
     html: `<div class="pin"><svg width="26" height="26" viewBox="0 0 26 26">
       <path d="M13 25C13 25 23 15.5 23 9.5C23 3.7 18.5 0 13 0C7.5 0 3 3.7 3 9.5C3 15.5 13 25 13 25Z" fill="${color}" stroke="#f3efe6" stroke-width="1.4"/>
