@@ -14,3 +14,9 @@ if (trip.value) initSync();
 // the user logged in/out in another tab.
 checkAuth();
 window.addEventListener("focus", checkAuth);
+
+// PWA: the service worker only adds offline fallback (network-first), so a
+// registration failure is harmless — log it and move on.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch((err) => console.warn("sw registration failed", err));
+}
