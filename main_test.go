@@ -339,27 +339,126 @@ func TestExpandFollowsShortLinkRedirect(t *testing.T) {
 	}
 }
 
-func TestExpandUnwrapsConsentWall(t *testing.T) {
+// placePage mimics the server-rendered head of a maps place page: og:title
+// with the name, og:image a static map centred on the pin. This is all the
+// coordinate data newer share links expose — their URLs carry none.
+const placePage = `<html><head>
+<meta content="Gure Toki &amp; Co · Plaza Barria, 12, Casco Viejo" property="og:title">
+<meta content="https://maps.google.com/maps/api/staticmap?center=43.2593788%2C-2.9222899&amp;zoom=15" property="og:image">
+</head><body></body></html>`
+
+func pageWith(req *http.Request, body string) *http.Response {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{},
+		Body:       io.NopCloser(strings.NewReader(body)),
+		Request:    req,
+	}
+}
+
+func TestExpandScrapesCoordsFromCoordinatelessPlacePage(t *testing.T) {
 	srv := newTestServer(t)
-	long := "https://www.google.com/maps/place/Gatz/@43.25819,-2.92598,17z"
+	long := "https://www.google.com/maps/place/Gure+Toki/data=!4m2!3m1!1s0xdead:0xbeef"
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		switch req.URL.Hostname() {
+		case "maps.app.goo.gl":
+			return redirectTo(req, long), nil
+		case "www.google.com":
+			// The consent opt-out must survive the cross-domain hop (Go
+			// strips Cookie on it) and the UA must look like a browser, or
+			// Google serves the wall / a shell page instead of the og: tags.
+			if c := req.Header.Get("Cookie"); !strings.Contains(c, "SOCS=CAI") {
+				t.Errorf("google.com request Cookie = %q, want SOCS=CAI", c)
+			}
+			if ua := req.Header.Get("User-Agent"); !strings.Contains(ua, "Mozilla") {
+				t.Errorf("google.com request User-Agent = %q", ua)
+			}
+			return pageWith(req, placePage), nil
+		default:
+			t.Errorf("unexpected outbound host %q", req.URL.Hostname())
+			return okPage(req), nil
+		}
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/H8VkkiU1bPjorJEU8"), "", "")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d: %s", res.StatusCode, readBody(t, res))
+	}
+	var got struct {
+		URL  string  `json:"url"`
+		Name string  `json:"name"`
+		Lat  float64 `json:"lat"`
+		Lng  float64 `json:"lng"`
+	}
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.URL != long {
+		t.Errorf("url = %q, want %q", got.URL, long)
+	}
+	if got.Lat != 43.2593788 || got.Lng != -2.9222899 {
+		t.Errorf("coords = %v,%v, want 43.2593788,-2.9222899", got.Lat, got.Lng)
+	}
+	if got.Name != "Gure Toki & Co" {
+		t.Errorf("name = %q, want %q (address trimmed, entities decoded)", got.Name, "Gure Toki & Co")
+	}
+}
+
+func TestExpandUnwrapsConsentWallAndRefetchesThePage(t *testing.T) {
+	srv := newTestServer(t)
+	long := "https://www.google.com/maps/place/Gure+Toki/data=!4m2!3m1!1s0xdead:0xbeef"
 	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
 		switch req.URL.Hostname() {
 		case "maps.app.goo.gl":
 			return redirectTo(req, "https://consent.google.com/m?continue="+neturl.QueryEscape(long)), nil
 		case "consent.google.com":
-			return okPage(req), nil
+			return pageWith(req, "<html>consent wall — no place data here</html>"), nil
+		case "www.google.com":
+			return pageWith(req, placePage), nil
 		default:
 			t.Errorf("unexpected outbound host %q", req.URL.Hostname())
 			return okPage(req), nil
 		}
 	})
 	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
-	var got map[string]string
+	var got struct {
+		URL string  `json:"url"`
+		Lat float64 `json:"lat"`
+		Lng float64 `json:"lng"`
+	}
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.URL != long {
+		t.Errorf("url = %q, want %q", got.URL, long)
+	}
+	if got.Lat != 43.2593788 || got.Lng != -2.9222899 {
+		t.Errorf("coords = %v,%v — the wall's page must not be the one scraped", got.Lat, got.Lng)
+	}
+}
+
+func TestExpandUnwrapsDynamicLinkWrapper(t *testing.T) {
+	srv := newTestServer(t)
+	long := "https://www.google.com/maps/place/Gatz/@43.25819,-2.92598,17z"
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() != "maps.app.goo.gl" {
+			t.Errorf("unexpected outbound host %q", req.URL.Hostname())
+			return okPage(req), nil
+		}
+		if req.URL.Query().Get("link") != "" { // second hop: the wrapper page
+			return okPage(req), nil
+		}
+		return redirectTo(req, "https://maps.app.goo.gl/?link="+neturl.QueryEscape(long)+"&apn=com.google.android.apps.maps"), nil
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d: %s", res.StatusCode, readBody(t, res))
+	}
+	var got map[string]any
 	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
 		t.Fatal(err)
 	}
 	if got["url"] != long {
-		t.Errorf("url = %q, want %q", got["url"], long)
+		t.Errorf("url = %v, want %q", got["url"], long)
 	}
 }
 

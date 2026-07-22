@@ -98,6 +98,23 @@ test("resolveMapsLink expands a short link via /expand and keeps it as the pin U
     assert.deepEqual(calls, ["/expand?url=" + encodeURIComponent("https://maps.app.goo.gl/H8VkkiU1bPjorJEU8")]);
   }));
 
+test("resolveMapsLink uses server-scraped coords and name when the expanded URL has none", () =>
+  withFetch(async () => ({
+    ok: true,
+    json: async () => ({
+      url: "https://www.google.com/maps/place/Gure+Toki/data=!4m2!3m1!1s0xdead:0xbeef",
+      name: "Gure Toki",
+      lat: 43.2593788,
+      lng: -2.9222899,
+    }),
+  }), async () => {
+    const place = await resolveMapsLink("https://maps.app.goo.gl/H8VkkiU1bPjorJEU8");
+    assert.equal(place.lat, 43.2593788);
+    assert.equal(place.lng, -2.9222899);
+    assert.equal(place.name, "Gure Toki");
+    assert.equal(place.url, "https://maps.app.goo.gl/H8VkkiU1bPjorJEU8");
+  }));
+
 test("resolveMapsLink returns null when /expand fails or yields no coordinates", async () => {
   await withFetch(async () => ({ ok: false }), async () => {
     assert.equal(await resolveMapsLink("https://maps.app.goo.gl/abc"), null);
