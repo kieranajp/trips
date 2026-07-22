@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"encoding/json"
 	"errors"
+	"html"
 	"io"
 	"io/fs"
 	"log"
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -108,6 +111,8 @@ var shortMapsHostRe = regexp.MustCompile(`^(maps\.app\.goo\.gl|goo\.gl|g\.co)$`)
 // stops the chain instead of being followed.
 var googleHostRe = regexp.MustCompile(`^((www|maps|consent)\.)?google(\.com?)?(\.[a-z]{2})?$`)
 
+const expandUA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+
 var expandClient = &http.Client{
 	Timeout: 10 * time.Second,
 	CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -115,40 +120,137 @@ var expandClient = &http.Client{
 		if len(via) >= 10 || (!shortMapsHostRe.MatchString(host) && !googleHostRe.MatchString(host)) {
 			return http.ErrUseLastResponse
 		}
+		// Go strips Cookie when a redirect crosses domains (goo.gl →
+		// google.com); re-attach it so the consent opt-out survives the hop.
+		req.Header.Set("Cookie", "SOCS=CAI")
 		return nil
 	},
 }
 
+// expandRequest builds the outbound request. A browser-ish UA gets the real
+// page (with its server-rendered og: meta tags), and the SOCS cookie is a
+// pre-made "reject all" consent choice that stops google.com bouncing EU
+// requests to the consent wall.
+func expandRequest(ctx context.Context, u string) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", expandUA)
+	req.Header.Set("Accept-Language", "en")
+	req.Header.Set("Cookie", "SOCS=CAI")
+	return req, nil
+}
+
+// readAtMost drains up to n bytes of a page; closing stays with the caller.
+func readAtMost(r io.Reader, n int64) []byte {
+	b, _ := io.ReadAll(io.LimitReader(r, n))
+	return b
+}
+
+const maxPageBytes = 2 << 20
+
+// Newer share links expand to a URL that names the place but carries no
+// coordinates — those only exist inside the page. Dig them out of the
+// server-rendered bits: the og:image static map (its center= is the pin),
+// a canonical /@lat,lng URL, or the APP_INITIALIZATION_STATE bootstrap
+// (which stores lng before lat).
+var pageCenterRe = regexp.MustCompile(`center=(-?\d[\d.]*)(?:%2C|,)(-?\d[\d.]*)`)
+var pageAtRe = regexp.MustCompile(`/@(-?\d[\d.]*),(-?\d[\d.]*)`)
+var pageInitRe = regexp.MustCompile(`APP_INITIALIZATION_STATE=\[\[\[-?[\d.]+,(-?\d[\d.]*),(-?\d[\d.]*)`)
+
+func pageCoords(body []byte) (lat, lng float64, ok bool) {
+	for _, probe := range []struct {
+		re      *regexp.Regexp
+		swapped bool // lng captured before lat
+	}{{pageCenterRe, false}, {pageAtRe, false}, {pageInitRe, true}} {
+		m := probe.re.FindSubmatch(body)
+		if m == nil {
+			continue
+		}
+		a, errA := strconv.ParseFloat(string(m[1]), 64)
+		b, errB := strconv.ParseFloat(string(m[2]), 64)
+		if errA != nil || errB != nil {
+			continue
+		}
+		if probe.swapped {
+			return b, a, true
+		}
+		return a, b, true
+	}
+	return 0, 0, false
+}
+
+var ogTitleRe = regexp.MustCompile(`property="og:title"[^>]*content="([^"]*)"|content="([^"]*)"[^>]*property="og:title"`)
+
+func pageName(body []byte) string {
+	m := ogTitleRe.FindSubmatch(body)
+	if m == nil {
+		return ""
+	}
+	title := string(m[1])
+	if title == "" {
+		title = string(m[2])
+	}
+	// og:title reads "Name · Street address" — keep just the name.
+	title, _, _ = strings.Cut(title, " · ")
+	return html.UnescapeString(title)
+}
+
 // expandHandler resolves a Google Maps short link (maps.app.goo.gl and
-// friends) to the full URL it redirects to, so the frontend can pull
-// coordinates out of it. The browser can't do this itself: CORS hides the
-// Location header of a cross-origin redirect.
+// friends) to the full URL it redirects to — the browser can't do this
+// itself: CORS hides the Location header of a cross-origin redirect. When
+// the expanded URL names a place without carrying its coordinates (the
+// common case for newer share links), the coordinates and name scraped from
+// the destination page ride along in the response.
 func expandHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	target, err := url.Parse(r.URL.Query().Get("url"))
-	if err != nil || (target.Scheme != "http" && target.Scheme != "https") || !shortMapsHostRe.MatchString(target.Hostname()) {
+	short, err := url.Parse(r.URL.Query().Get("url"))
+	if err != nil || (short.Scheme != "http" && short.Scheme != "https") || !shortMapsHostRe.MatchString(short.Hostname()) {
 		http.Error(w, "not a Google Maps short link", http.StatusBadRequest)
 		return
 	}
-	target.Scheme = "https"
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, target.String(), nil)
+	short.Scheme = "https"
+	req, err := expandRequest(r.Context(), short.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	res, err := expandClient.Do(req)
 	if err != nil {
+		log.Printf("expand %s: %v", short, err)
 		http.Error(w, "could not expand link", http.StatusBadGateway)
 		return
 	}
-	res.Body.Close() // only the final URL matters, never the page
+	body := readAtMost(res.Body, maxPageBytes)
+	res.Body.Close()
 	final := res.Request.URL
-	// The EU consent wall wraps the real destination in a continue param.
+
+	// EU consent wall: the real destination hides in continue=, and the body
+	// we just read is the wall itself — fetch the destination once more for
+	// its metadata (the SOCS cookie usually prevents this hop entirely).
 	if final.Hostname() == "consent.google.com" {
-		if next, err := url.Parse(final.Query().Get("continue")); err == nil && next.Host != "" {
+		if next, err := url.Parse(final.Query().Get("continue")); err == nil && googleHostRe.MatchString(next.Hostname()) {
+			final = next
+			body = nil
+			if req2, err := expandRequest(r.Context(), final.String()); err == nil {
+				if res2, err := expandClient.Do(req2); err == nil {
+					if res2.Request.URL.Hostname() != "consent.google.com" {
+						final = res2.Request.URL
+						body = readAtMost(res2.Body, maxPageBytes)
+					}
+					res2.Body.Close()
+				}
+			}
+		}
+	}
+	// Firebase-dynamic-link wrapper (old goo.gl/maps links): the destination
+	// hides in ?link=.
+	if l := final.Query().Get("link"); l != "" {
+		if next, err := url.Parse(l); err == nil && googleHostRe.MatchString(next.Hostname()) {
 			final = next
 		}
 	}
@@ -156,11 +258,21 @@ func expandHandler(w http.ResponseWriter, r *http.Request) {
 	// follow (or Google didn't redirect at all) — that's a failure, not a
 	// result the frontend could parse coordinates from.
 	if shortMapsHostRe.MatchString(final.Hostname()) {
+		log.Printf("expand %s: stuck on %s", short, final)
 		http.Error(w, "could not expand link", http.StatusBadGateway)
 		return
 	}
+	out := map[string]any{"url": final.String()}
+	if name := pageName(body); name != "" {
+		out["name"] = name
+	}
+	lat, lng, ok := pageCoords(body)
+	if ok {
+		out["lat"], out["lng"] = lat, lng
+	}
+	log.Printf("expand %s -> %s (page coords: %t)", short, final, ok)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"url": final.String()})
+	json.NewEncoder(w).Encode(out)
 }
 
 func stateHandler(w http.ResponseWriter, r *http.Request) {

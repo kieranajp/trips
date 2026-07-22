@@ -22,7 +22,10 @@ export function isShortMapsLink(link) {
 // Resolve any pasted Google Maps link to { name, lat, lng, url }. Full URLs
 // parse locally; short links are expanded through the server's /expand
 // endpoint (the browser can't follow the redirect itself — CORS hides the
-// Location header). Returns null when no coordinates can be found either way.
+// Location header). Newer share links expand to a URL that carries no
+// coordinates at all, so the server also scrapes lat/lng and the place name
+// out of the destination page and sends them alongside the URL. Returns
+// null when no coordinates can be found any of those ways.
 export async function resolveMapsLink(link) {
   const trimmed = String(link ?? "").trim();
   const direct = parseMapsLink(trimmed);
@@ -30,10 +33,13 @@ export async function resolveMapsLink(link) {
   try {
     const res = await fetch("/expand?url=" + encodeURIComponent(trimmed));
     if (!res.ok) return null;
-    const { url } = await res.json();
-    const place = parseMapsLink(url);
+    const data = await res.json();
+    const place = parseMapsLink(data.url)
+      || (Number.isFinite(data.lat) && Number.isFinite(data.lng)
+        ? { name: "", lat: data.lat, lng: data.lng } : null);
+    if (!place) return null;
     // Keep the short link as the pin's URL — it's the canonical share link.
-    return place && { ...place, url: trimmed };
+    return { ...place, name: place.name || data.name || "", url: trimmed };
   } catch {
     return null;
   }
