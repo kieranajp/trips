@@ -161,6 +161,12 @@ const maxPageBytes = 2 << 20
 var pageCenterRe = regexp.MustCompile(`center=(-?\d[\d.]*)(?:%2C|,)(-?\d[\d.]*)`)
 var pagePinRe = regexp.MustCompile(`!3d(-?\d[\d.]*)!4d(-?\d[\d.]*)`)
 
+// Google's "location unknown" render centres on the geographic middle of the
+// USA — it shows up as the og:image center= whenever the page carries no real
+// location (newest share links, requests from datacenter IPs). It is never a
+// real pin, so treat it as "no coordinates" and let the embed lookup run.
+func isDefaultCenter(lat, lng float64) bool { return lat == 37.0625 && lng == -95.677068 }
+
 func pageCoords(body []byte) (lat, lng float64, ok bool) {
 	for _, re := range []*regexp.Regexp{pageCenterRe, pagePinRe} {
 		m := re.FindSubmatch(body)
@@ -169,12 +175,55 @@ func pageCoords(body []byte) (lat, lng float64, ok bool) {
 		}
 		a, errA := strconv.ParseFloat(string(m[1]), 64)
 		b, errB := strconv.ParseFloat(string(m[2]), 64)
-		if errA != nil || errB != nil {
+		if errA != nil || errB != nil || isDefaultCenter(a, b) {
 			continue
 		}
 		return a, b, true
 	}
 	return 0, 0, false
+}
+
+// The newest share links expand to a URL whose data blob holds only the
+// place's feature id ("0x<fid>:0x<cid>") — neither the URL nor the page
+// carries the pin; Google resolves the id client-side after the JS boots.
+// The embed render is the one server-rendered view that still has it:
+// /maps?cid=<cid>&output=embed returns a small page whose place record reads
+// ["0x…:0x…","<address>",[lat,lng],"<cid>"]. The cid is the second half of
+// the feature id in decimal.
+var ftidCidRe = regexp.MustCompile(`!1s0x[0-9a-f]+:0x([0-9a-f]+)`)
+
+func embedCoords(ctx context.Context, final *url.URL) (lat, lng float64, ok bool) {
+	m := ftidCidRe.FindStringSubmatch(final.String())
+	if m == nil {
+		return 0, 0, false
+	}
+	cid, err := strconv.ParseUint(m[1], 16, 64)
+	if err != nil {
+		return 0, 0, false
+	}
+	id := strconv.FormatUint(cid, 10)
+	req, err := expandRequest(ctx, "https://www.google.com/maps?cid="+id+"&output=embed")
+	if err != nil {
+		return 0, 0, false
+	}
+	res, err := expandClient.Do(req)
+	if err != nil {
+		log.Printf("embed cid=%s: %v", id, err)
+		return 0, 0, false
+	}
+	body := readAtMost(res.Body, maxPageBytes)
+	res.Body.Close()
+	// Anchoring on the cid we asked for keeps the match unambiguous.
+	pin := regexp.MustCompile(`\[(-?\d[\d.]*),(-?\d[\d.]*)\],"` + id + `"`).FindSubmatch(body)
+	if pin == nil {
+		return 0, 0, false
+	}
+	a, errA := strconv.ParseFloat(string(pin[1]), 64)
+	b, errB := strconv.ParseFloat(string(pin[2]), 64)
+	if errA != nil || errB != nil {
+		return 0, 0, false
+	}
+	return a, b, true
 }
 
 var ogTitleRe = regexp.MustCompile(`property="og:title"[^>]*content="([^"]*)"|content="([^"]*)"[^>]*property="og:title"`)
@@ -278,10 +327,13 @@ func expandHandler(w http.ResponseWriter, r *http.Request) {
 		out["name"] = name
 	}
 	lat, lng, ok := pageCoords(body)
+	if !ok {
+		lat, lng, ok = embedCoords(r.Context(), final)
+	}
 	if ok {
 		out["lat"], out["lng"] = lat, lng
 	}
-	log.Printf("expand %s -> %s (page coords: %t)", short, final, ok)
+	log.Printf("expand %s -> %s (coords: %t)", short, final, ok)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(out)
 }
