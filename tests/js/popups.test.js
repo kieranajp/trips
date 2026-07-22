@@ -59,6 +59,18 @@ test("pinPopupHtml offers Share to everyone, with the id escaped", () => {
   assert.ok(html.includes(`data-share="x&quot; onclick=&quot;p"`));
 });
 
+test("pinPopupHtml shows the visited day, and the check-off button to editors", () => {
+  const pin = { id: "p_1", cat: "pintxos", name: "Bar", visitedAt: "2026-07-22" };
+  const loggedOut = pinPopupHtml(pin);
+  assert.ok(loggedOut.includes("pop-visited"));
+  assert.ok(loggedOut.includes("22")); // locale-formatted, but the day survives
+  assert.ok(!loggedOut.includes("data-visit"), "check-off is edit-gated");
+
+  authUser.value = { user: "k" };
+  assert.ok(pinPopupHtml(pin).includes(">Unvisit<"));
+  assert.ok(pinPopupHtml({ id: "p_1", cat: "pintxos", name: "Bar" }).includes(">Check off ✓<"));
+});
+
 test("stayPopupHtml escapes name and address", () => {
   const html = stayPopupHtml({ name: `<i>Hotel</i>`, address: `1 "Main" St`, url: "javascript:x" });
   assert.ok(!html.includes("<i>"));

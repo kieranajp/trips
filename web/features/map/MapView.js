@@ -2,7 +2,8 @@ import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
 import { areasOn, cats, editing, only, search, searchedPins, tab, trip, visiblePins } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
-import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
+import { removePin, savePin, toggleOnly, toggleVisited, toast } from "../../state/actions.js";
+import { fmtDay } from "../../lib/dates.js";
 import { MAPS_LINK_HINT, isShortMapsLink, resolveMapsLink } from "../../lib/maps.js";
 import { flyTo, invalidate, mountMap } from "./leaflet.js";
 import { initSheet } from "./sheet.js";
@@ -48,7 +49,12 @@ function PinList() {
         return html`
           <div class="pl-cat"><span class="sw" style=${`background:${category.color}`}></span>${category.name}</div>
           ${categoryPins.map((pin) => html`
-            <div class="pi" style=${`border-left-color:${category.color}`}>
+            <div class=${"pi" + (pin.visitedAt ? " visited" : "")} style=${`border-left-color:${category.color}`}>
+              ${canEdit.value ? html`
+                <button class=${"visit" + (pin.visitedAt ? " on" : "")}
+                  title=${pin.visitedAt ? `Visited ${fmtDay(pin.visitedAt)} — tap to undo` : "Check off as visited"}
+                  onClick=${(event) => { event.stopPropagation(); toggleVisited(pin); }}>✓</button>`
+                : pin.visitedAt ? html`<span class="visit on static" title=${`Visited ${fmtDay(pin.visitedAt)}`}>✓</span>` : null}
               <div class="txt" onClick=${() => flyTo(pin)}>
                 <div class="nm">${pin.name}</div>
                 ${pin.note ? html`<div class="nt">${truncate(pin.note, 90)}</div>` : null}

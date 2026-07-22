@@ -185,6 +185,20 @@ test("the popup Edit button closes the popup and opens the pin editor", () => {
   assert.equal(editing.value.pin.id, "p_1");
 });
 
+test("the popup Check off button marks the pin visited; the marker gets a tick", () => {
+  authUser.value = { user: "k" };
+  trip.value = { id: "bilbao" }; // toggleVisited persists via save(), which needs a trip id
+  const { markerGroup } = mount();
+  assert.ok(!markerGroup.items[0].opts.icon.spec.html.includes("<path d=\"M9.2"), "unvisited pin has no tick");
+  const button = {};
+  markerGroup.items[0].events.popupopen(fakePopupContent({ "[data-visit]": button }));
+  button.onclick();
+  assert.match(pins.value[0].visitedAt, /^\d{4}-\d{2}-\d{2}$/);
+  // pins changed → markers re-rendered → the fresh icon carries the tick
+  assert.ok(markerGroup.items[0].opts.icon.spec.html.includes("stroke-linejoin"));
+  assert.ok(!markerGroup.items[0].opts.icon.spec.html.includes("<circle"));
+});
+
 test("the popup Share button hands the visitor a permalink (prompt fallback in Node)", async () => {
   trip.value = { id: "bilbao" };
   globalThis.location = { origin: "https://trips.example", pathname: "/" };
