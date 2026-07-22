@@ -30,11 +30,15 @@ export const computed = (fn) => ({
 });
 
 export function effect(fn) {
+  let disposed = false;
   const run = () => {
+    if (disposed) return;
     const prev = currentEffect;
     currentEffect = run;
     try { fn(); } finally { currentEffect = prev; }
   };
   run();
-  return () => {}; // dispose is never used by the code under test
+  // Dispose: the subscription entries leak (they just no-op), which is fine
+  // for test lifetimes.
+  return () => { disposed = true; };
 }

@@ -4,13 +4,7 @@
 // escapeHtml, and hrefs only ever come out as http(s).
 import { catById } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
-
-export const escapeHtml = (value) => String(value ?? "").replace(/[&<>"]/g, (character) => ({
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-}[character]));
+import { escapeHtml } from "../../lib/html.js";
 
 // A place's `url` can be any string (pasted link, imported file), so only
 // http(s) is honoured; anything else (javascript:, data:, …) falls back to a

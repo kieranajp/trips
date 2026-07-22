@@ -30,7 +30,7 @@ Preact + htm + `@preact/signals` via `<script type="importmap">` from esm.sh:
 
 ## Tests run without npm install
 
-`go test ./...` for the server; `npm test` for the frontend (Node 22+, built-in `node --test`, zero dependencies). The browser resolves `@preact/signals` via the import map in `index.html`; Node can't, so `tests/js/loader.mjs` maps that one specifier to a tiny local stub (`tests/js/stubs/preact-signals.js`). Component/JSX code and the imperative Leaflet layer aren't covered — pure logic modules are. `package.json` exists only for `"type": "module"` + the test script; don't add runtime deps to it.
+`go test ./...` for the server; `npm test` for the frontend (Node 22+, built-in `node --test`, zero dependencies). The browser resolves `@preact/signals` via the import map in `index.html`; Node can't, so `tests/js/loader.mjs` maps that one specifier to a tiny local stub (`tests/js/stubs/preact-signals.js`). Pure logic modules are covered, and the Leaflet controller (`createTripMap`) is tested against a recording fake of the Leaflet API (`tests/js/leaflet.test.js`) — Component/JSX code isn't. `package.json` exists only for `"type": "module"` + the test script; don't add runtime deps to it.
 
 ## Trip switching is a full page load
 

@@ -2,7 +2,8 @@ import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { authUser } from "../../web/state/auth.js";
 import { cats } from "../../web/state/signals.js";
-import { escapeHtml, mapsUrl, pinPopupHtml, stayPopupHtml } from "../../web/features/map/popups.js";
+import { escapeHtml } from "../../web/lib/html.js";
+import { mapsUrl, pinPopupHtml, stayPopupHtml } from "../../web/features/map/popups.js";
 
 beforeEach(() => {
   cats.value = [{ id: "pintxos", name: "Pintxos", color: "#d9822b" }];

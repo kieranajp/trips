@@ -1,6 +1,6 @@
 import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { catById, cats, onMap, pinMatches, pins } from "../../web/state/signals.js";
+import { catById, cats, onMap, only, pinMatches, pins, search, searchedPins, visiblePins } from "../../web/state/signals.js";
 
 beforeEach(() => {
   cats.value = [
@@ -8,6 +8,8 @@ beforeEach(() => {
     { id: "saved", name: "Saved", color: "#5b6672" },
   ];
   pins.value = [];
+  search.value = "";
+  only.value = null;
 });
 
 test("pinMatches: empty or whitespace query matches everything", () => {
@@ -31,6 +33,30 @@ test("pinMatches copes with missing name/note", () => {
 test("catById finds a category, and falls back to the last one for unknown ids", () => {
   assert.equal(catById("coffee").name, "Coffee");
   assert.equal(catById("deleted-cat").id, "saved");
+});
+
+test("searchedPins applies the query but ignores the category filter", () => {
+  pins.value = [
+    { id: "p_1", name: "Café Iruña", note: "", cat: "coffee" },
+    { id: "p_2", name: "Ribera market café", note: "", cat: "saved" },
+    { id: "p_3", name: "Guggenheim", note: "", cat: "saved" },
+  ];
+  search.value = "café";
+  only.value = "coffee"; // must not affect searchedPins (chip counts use it)
+  assert.deepEqual(searchedPins.value.map((pin) => pin.id), ["p_1", "p_2"]);
+});
+
+test("visiblePins applies both the query and the category filter", () => {
+  pins.value = [
+    { id: "p_1", name: "Café Iruña", note: "", cat: "coffee" },
+    { id: "p_2", name: "Ribera market café", note: "", cat: "saved" },
+    { id: "p_3", name: "Guggenheim", note: "", cat: "saved" },
+  ];
+  assert.equal(visiblePins.value.length, 3);
+  search.value = "café";
+  assert.deepEqual(visiblePins.value.map((pin) => pin.id), ["p_1", "p_2"]);
+  only.value = "coffee";
+  assert.deepEqual(visiblePins.value.map((pin) => pin.id), ["p_1"]);
 });
 
 test("onMap reports whether a catalogue entry has been placed", () => {
