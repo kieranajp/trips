@@ -2,6 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { html } from "htm/preact";
 import { cats, editing } from "../state/signals.js";
 import { removePin, savePin, toast } from "../state/actions.js";
+import { COORDS_HINT, parseLatLng } from "../lib/maps.js";
 
 function PinForm({ edit }) {
   const pin = edit.pin;
@@ -19,12 +20,9 @@ function PinForm({ edit }) {
   const close = () => (editing.value = null);
   const submit = () => {
     if (!name.trim()) { toast("Give it a name"); return; }
-    const parsed = coords.split(",").map((value) => parseFloat(value.trim()));
-    if (parsed.length !== 2 || parsed.some(Number.isNaN)) {
-      toast("Coordinates need to be: lat, lng");
-      return;
-    }
-    const fields = { name: name.trim(), cat: category, note: note.trim(), lat: parsed[0], lng: parsed[1] };
+    const parsed = parseLatLng(coords);
+    if (!parsed) { toast(COORDS_HINT); return; }
+    const fields = { name: name.trim(), cat: category, note: note.trim(), lat: parsed.lat, lng: parsed.lng };
     if (!pin && edit.url) fields.url = edit.url;
     savePin(fields, pin);
     close();

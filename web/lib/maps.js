@@ -13,3 +13,12 @@ export function parseMapsLink(link) {
 
 export const MAPS_LINK_HINT =
   "No coordinates in that link — open the place in Google Maps and copy the full URL (short links won't work)";
+
+// Parse a "lat, lng" text field into numbers, or null if it isn't one.
+export function parseLatLng(text) {
+  const parts = String(text ?? "").split(",").map((value) => parseFloat(value.trim()));
+  if (parts.length !== 2 || parts.some(Number.isNaN)) return null;
+  return { lat: parts[0], lng: parts[1] };
+}
+
+export const COORDS_HINT = "Coordinates need to be: lat, lng";

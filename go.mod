@@ -2,7 +2,11 @@ module github.com/kieranajp/trips
 
 go 1.26
 
-require modernc.org/sqlite v1.34.4
+require (
+	github.com/joho/godotenv v1.5.1
+	github.com/kelseyhightower/envconfig v1.4.0
+	modernc.org/sqlite v1.34.4
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect

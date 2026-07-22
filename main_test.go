@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -281,35 +280,4 @@ func TestWhoamiEchoesIdentityHeaders(t *testing.T) {
 	if cc := res.Header.Get("Cache-Control"); cc != "no-store" {
 		t.Errorf("Cache-Control = %q, want no-store", cc)
 	}
-}
-
-func TestLoadEnvFile(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, ".env")
-	content := "# comment\n\nFOO=bar\nQUOTED=\"with spaces\"\nSINGLE='sq'\nPRESET=from-file\nNOEQUALS\n  SPACED  =  padded  \n"
-	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("PRESET", "from-env")
-	for _, k := range []string{"FOO", "QUOTED", "SINGLE", "SPACED"} {
-		os.Unsetenv(k)
-		t.Cleanup(func() { os.Unsetenv(k) })
-	}
-
-	loadEnvFile(path)
-
-	for k, want := range map[string]string{
-		"FOO":    "bar",
-		"QUOTED": "with spaces",
-		"SINGLE": "sq",
-		"SPACED": "padded",
-		"PRESET": "from-env", // real env wins over the file
-	} {
-		if got := os.Getenv(k); got != want {
-			t.Errorf("%s = %q, want %q", k, got, want)
-		}
-	}
-
-	// Missing file is a silent no-op.
-	loadEnvFile(filepath.Join(dir, "nope.env"))
 }

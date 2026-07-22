@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { html } from "htm/preact";
 import { editingLog, trip } from "../../state/signals.js";
 import { removeFlight, removeStay, saveFlight, saveStay, toast } from "../../state/actions.js";
-import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
+import { COORDS_HINT, MAPS_LINK_HINT, parseLatLng, parseMapsLink } from "../../lib/maps.js";
 
 // Field specs per kind: [key, label, inputType, placeholder]. The order here
 // is the order they render, so adding a logistics type is just a new list.
@@ -162,9 +162,10 @@ function LogisticsForm({ edit }) {
       const raw = (fields.coords || "").trim();
       delete fields.coords;
       if (raw) {
-        const parts = raw.split(",").map((value) => parseFloat(value.trim()));
-        if (parts.length !== 2 || parts.some(Number.isNaN)) { toast("Coordinates need to be: lat, lng"); return; }
-        [fields.lat, fields.lng] = parts;
+        const parsed = parseLatLng(raw);
+        if (!parsed) { toast(COORDS_HINT); return; }
+        fields.lat = parsed.lat;
+        fields.lng = parsed.lng;
       } else {
         fields.lat = null;
         fields.lng = null;

@@ -1,6 +1,7 @@
 import { cats, editingLog, flights, only, pins, stays, toastMsg, trip, onMap } from "./signals.js";
 import { save } from "./persistence.js";
 import { freshState } from "./trips.js";
+import { uid } from "../lib/uid.js";
 
 let toastTimer;
 
@@ -10,21 +11,32 @@ export function toast(message) {
   toastTimer = setTimeout(() => (toastMsg.value = ""), 2200);
 }
 
+// Pins, flights and stays all mutate the same way: patch-by-id or append with
+// a fresh id, then persist; deletion is confirm-then-filter. One factory each,
+// parameterised by the signal.
+const upsert = (list, prefix, extra) => (fields, target) => {
+  if (target) list.value = list.value.map((item) => (item.id === target.id ? { ...item, ...fields } : item));
+  else list.value = [...list.value, { id: uid(prefix), ...extra, ...fields }];
+  save();
+};
+
+const removeWithConfirm = (list, message) => (id) => {
+  const item = list.value.find((entry) => entry.id === id);
+  if (!item || !confirm(message(item))) return;
+  list.value = list.value.filter((entry) => entry.id !== id);
+  save();
+};
+
+export const savePin = upsert(pins, "p_", { src: null });
+export const saveFlight = upsert(flights, "fl_");
+export const saveStay = upsert(stays, "st_");
+
+export const removePin = removeWithConfirm(pins, (pin) => `Remove “${pin.name}”?`);
+export const removeFlight = removeWithConfirm(flights, () => "Remove this flight?");
+export const removeStay = removeWithConfirm(stays, (stay) => `Remove “${stay.name}”?`);
+
 export function addPin(pin) {
   pins.value = [...pins.value, pin];
-  save();
-}
-
-export function removePin(id) {
-  const pin = pins.value.find((item) => item.id === id);
-  if (!pin || !confirm(`Remove “${pin.name}”?`)) return;
-  pins.value = pins.value.filter((item) => item.id !== id);
-  save();
-}
-
-export function savePin(fields, target) {
-  if (target) pins.value = pins.value.map((pin) => (pin.id === target.id ? { ...pin, ...fields } : pin));
-  else pins.value = [...pins.value, { id: "p_" + Date.now().toString(36), src: null, ...fields }];
   save();
 }
 
@@ -36,7 +48,7 @@ export function toggleCatalog(item) {
     return;
   }
   addPin({
-    id: "p_" + item.cid + "_" + Date.now().toString(36),
+    id: uid("p_" + item.cid + "_"),
     name: item.name,
     lat: item.lat,
     lng: item.lng,
@@ -46,32 +58,6 @@ export function toggleCatalog(item) {
     src: item.cid,
   });
   toast(item.name + " added to the map");
-}
-
-export function saveFlight(fields, target) {
-  if (target) flights.value = flights.value.map((flight) => (flight.id === target.id ? { ...flight, ...fields } : flight));
-  else flights.value = [...flights.value, { id: "fl_" + Date.now().toString(36), ...fields }];
-  save();
-}
-
-export function removeFlight(id) {
-  const flight = flights.value.find((item) => item.id === id);
-  if (!flight || !confirm("Remove this flight?")) return;
-  flights.value = flights.value.filter((item) => item.id !== id);
-  save();
-}
-
-export function saveStay(fields, target) {
-  if (target) stays.value = stays.value.map((stay) => (stay.id === target.id ? { ...stay, ...fields } : stay));
-  else stays.value = [...stays.value, { id: "st_" + Date.now().toString(36), ...fields }];
-  save();
-}
-
-export function removeStay(id) {
-  const stay = stays.value.find((item) => item.id === id);
-  if (!stay || !confirm(`Remove “${stay.name}”?`)) return;
-  stays.value = stays.value.filter((item) => item.id !== id);
-  save();
 }
 
 export function editLog(kind, item) {
@@ -86,7 +72,7 @@ export function updateCat(id, patch) {
 export function addCat() {
   const palette = ["#c2410c", "#7c5cbf", "#0e7490", "#b45309", "#4d7c0f", "#9d174d"];
   cats.value = [...cats.value, {
-    id: "cat_" + Date.now().toString(36),
+    id: uid("cat_"),
     name: "New category",
     color: palette[cats.value.length % palette.length],
   }];

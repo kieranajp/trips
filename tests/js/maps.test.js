@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseMapsLink } from "../../web/lib/maps.js";
+import { parseLatLng, parseMapsLink } from "../../web/lib/maps.js";
+import { uid } from "../../web/lib/uid.js";
 
 test("place URL: prefers the precise !3d!4d coords over the @viewport", () => {
   const link = "https://www.google.com/maps/place/Gure+Toki/@43.2593,-2.9222,17z/data=!4m6!3m5!8m2!3d43.2593788!4d-2.9222899";
@@ -27,6 +28,27 @@ test("q= and query= coordinate URLs work", () => {
   const place = parseMapsLink("https://www.google.com/maps/search/?api=1&query=-33.86,151.21");
   assert.equal(place.lat, -33.86);
   assert.equal(place.lng, 151.21);
+});
+
+test("parseLatLng accepts 'lat, lng' text in its various spacings", () => {
+  assert.deepEqual(parseLatLng("43.2678, -2.9281"), { lat: 43.2678, lng: -2.9281 });
+  assert.deepEqual(parseLatLng("43,-2"), { lat: 43, lng: -2 });
+  assert.deepEqual(parseLatLng("  -33.86 , 151.21  "), { lat: -33.86, lng: 151.21 });
+});
+
+test("parseLatLng rejects anything that isn't exactly two numbers", () => {
+  assert.equal(parseLatLng(""), null);
+  assert.equal(parseLatLng(null), null);
+  assert.equal(parseLatLng("43.2678"), null);
+  assert.equal(parseLatLng("1,2,3"), null);
+  assert.equal(parseLatLng("lat, lng"), null);
+  assert.equal(parseLatLng("43.2, north"), null);
+});
+
+test("uid keeps the prefix and never collides in a burst", () => {
+  const ids = new Set(Array.from({ length: 1000 }, () => uid("p_")));
+  assert.equal(ids.size, 1000);
+  for (const id of ids) assert.match(id, /^p_/);
 });
 
 test("links without coordinates return null", () => {

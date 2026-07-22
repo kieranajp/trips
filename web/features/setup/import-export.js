@@ -1,6 +1,7 @@
 import { cats, pins, trip } from "../../state/signals.js";
 import { addPin, toast } from "../../state/actions.js";
 import { save } from "../../state/persistence.js";
+import { uid } from "../../lib/uid.js";
 
 export function exportJson() {
   const data = JSON.stringify({
@@ -48,7 +49,7 @@ function importJson(data) {
     const importedPins = [...pins.value];
     data.pins.forEach((pin) => {
       if (!isDuplicate(pin.lat, pin.lng, pin.name)) {
-        importedPins.push({ ...pin, id: pin.id || "p_" + Math.random().toString(36).slice(2) });
+        importedPins.push({ ...pin, id: pin.id || uid("p_") });
       }
     });
     cats.value = categories;
@@ -126,7 +127,7 @@ async function importCsv(text) {
       failed++;
     }
     if (!isDuplicate(lat, lng, name)) {
-      addPin({ id: "p_" + Math.random().toString(36).slice(2), name, lat, lng, cat: "saved", note, src: null });
+      addPin({ id: uid("p_"), name, lat, lng, cat: "saved", note, src: null });
       added++;
     }
     if (i < items.length - 1) await sleep(1100);

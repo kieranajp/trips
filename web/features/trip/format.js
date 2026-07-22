@@ -22,12 +22,6 @@ export function fmtTime(value) {
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
 
-export function fmtDate(value) {
-  const date = parse(value);
-  if (!date) return value || "";
-  return date.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
-}
-
 // Whole nights between two check-in/out datetimes, or null if either is unset.
 export function nights(checkIn, checkOut) {
   const start = parse(checkIn);

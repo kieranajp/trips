@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"database/sql"
 	"embed"
 	"encoding/json"
@@ -9,12 +8,21 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 	_ "modernc.org/sqlite"
 )
+
+// config is read from the environment; a .env file fills in blanks for local
+// dev (godotenv.Load never overrides vars that are already set, so real env
+// wins over the file).
+type config struct {
+	DBPath string `envconfig:"DB_PATH" default:"/data/trip.db"`
+	Port   string `envconfig:"PORT" default:"8080"`
+}
 
 //go:embed all:web
 var webFS embed.FS
@@ -196,14 +204,15 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	loadEnvFile(".env")
+	_ = godotenv.Load() // optional .env for local dev; missing file is fine
 
-	path := os.Getenv("DB_PATH")
-	if path == "" {
-		path = "/data/trip.db"
+	var cfg config
+	if err := envconfig.Process("", &cfg); err != nil {
+		log.Fatal(err)
 	}
+
 	var err error
-	db, err = openDB(path)
+	db, err = openDB(cfg.DBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -213,36 +222,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	addr := ":8080"
-	if p := os.Getenv("PORT"); p != "" {
-		addr = ":" + p
-	}
+	addr := ":" + cfg.Port
 	log.Println("trips listening on", addr)
 	log.Fatal(http.ListenAndServe(addr, newMux(web)))
-}
-
-// loadEnvFile sets KEY=VALUE lines from path into the environment, without
-// clobbering vars already set (real env wins over the file).
-func loadEnvFile(path string) {
-	f, err := os.Open(path)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		line := strings.TrimSpace(s.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		k, v, ok := strings.Cut(line, "=")
-		if !ok {
-			continue
-		}
-		if k = strings.TrimSpace(k); k != "" {
-			if _, set := os.LookupEnv(k); !set {
-				os.Setenv(k, strings.Trim(strings.TrimSpace(v), `"'`))
-			}
-		}
-	}
 }
