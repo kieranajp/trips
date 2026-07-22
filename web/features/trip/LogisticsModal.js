@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { html } from "htm/preact";
 import { editingLog, trip } from "../../state/signals.js";
 import { removeFlight, removeStay, saveFlight, saveStay, toast } from "../../state/actions.js";
-import { COORDS_HINT, MAPS_LINK_HINT, parseLatLng, parseMapsLink } from "../../lib/maps.js";
+import { COORDS_HINT, MAPS_LINK_HINT, isShortMapsLink, parseLatLng, resolveMapsLink } from "../../lib/maps.js";
 
 // Field specs per kind: [key, label, inputType, placeholder]. The order here
 // is the order they render, so adding a logistics type is just a new list.
@@ -139,10 +139,11 @@ function LogisticsForm({ edit }) {
   const set = (key, value) => setValues((current) => ({ ...current, [key]: value }));
   const get = (key) => values[key] || "";
 
-  const fromMapsLink = () => {
+  const fromMapsLink = async () => {
     const link = prompt("Paste a Google Maps link for where you're staying");
     if (!link) return;
-    const place = parseMapsLink(link);
+    if (isShortMapsLink(link)) toast("Expanding short link…");
+    const place = await resolveMapsLink(link);
     if (!place) { toast(MAPS_LINK_HINT); return; }
     setValues((current) => ({
       ...current,

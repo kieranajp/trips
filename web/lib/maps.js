@@ -11,8 +11,36 @@ export function parseMapsLink(link) {
   return { name, lat: +coords[1], lng: +coords[2], url: link };
 }
 
+// The share-sheet domains Google Maps hands out. These URLs carry no
+// coordinates themselves — only the redirect target does.
+const shortMapsLinkRe = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl|g\.co)\//i;
+
+export function isShortMapsLink(link) {
+  return shortMapsLinkRe.test(String(link ?? "").trim());
+}
+
+// Resolve any pasted Google Maps link to { name, lat, lng, url }. Full URLs
+// parse locally; short links are expanded through the server's /expand
+// endpoint (the browser can't follow the redirect itself — CORS hides the
+// Location header). Returns null when no coordinates can be found either way.
+export async function resolveMapsLink(link) {
+  const trimmed = String(link ?? "").trim();
+  const direct = parseMapsLink(trimmed);
+  if (direct || !isShortMapsLink(trimmed)) return direct;
+  try {
+    const res = await fetch("/expand?url=" + encodeURIComponent(trimmed));
+    if (!res.ok) return null;
+    const { url } = await res.json();
+    const place = parseMapsLink(url);
+    // Keep the short link as the pin's URL — it's the canonical share link.
+    return place && { ...place, url: trimmed };
+  } catch {
+    return null;
+  }
+}
+
 export const MAPS_LINK_HINT =
-  "No coordinates in that link — open the place in Google Maps and copy the full URL (short links won't work)";
+  "Couldn't find coordinates in that link — paste a Google Maps share link or the full URL of the place";
 
 // Parse a "lat, lng" text field into numbers, or null if it isn't one.
 export function parseLatLng(text) {

@@ -3,16 +3,17 @@ import { html } from "htm/preact";
 import { areasOn, cats, editing, only, search, searchedPins, tab, trip, visiblePins } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
-import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
+import { MAPS_LINK_HINT, isShortMapsLink, resolveMapsLink } from "../../lib/maps.js";
 import { flyTo, invalidate, mountMap } from "./leaflet.js";
 import { initSheet } from "./sheet.js";
 
 const truncate = (text, length) => text.length > length ? text.slice(0, length - 1) + "…" : text;
 
-function pinFromLink() {
+async function pinFromLink() {
   const link = prompt("Paste a Google Maps link");
   if (!link) return;
-  const place = parseMapsLink(link);
+  if (isShortMapsLink(link)) toast("Expanding short link…");
+  const place = await resolveMapsLink(link);
   if (!place) { toast(MAPS_LINK_HINT); return; }
   editing.value = { latlng: { lat: place.lat, lng: place.lng }, name: place.name, url: place.url };
 }

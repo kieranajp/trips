@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	neturl "net/url"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -277,6 +278,128 @@ func TestFileNameQuoteStripping(t *testing.T) {
 	res = do(t, http.MethodGet, srv.URL+"/files?trip=bilbao&id=1", "", "")
 	if cd := res.Header.Get("Content-Disposition"); strings.Count(cd, `"`) != 2 {
 		t.Errorf("quotes not stripped from filename: %q", cd)
+	}
+}
+
+// roundTripFunc lets tests script the responses /expand sees from Google,
+// so no test ever touches the network.
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+func stubExpandTransport(t *testing.T, fn roundTripFunc) {
+	t.Helper()
+	prev := expandClient.Transport
+	expandClient.Transport = fn
+	t.Cleanup(func() { expandClient.Transport = prev })
+}
+
+func redirectTo(req *http.Request, location string) *http.Response {
+	return &http.Response{
+		StatusCode: http.StatusFound,
+		Header:     http.Header{"Location": []string{location}},
+		Body:       io.NopCloser(strings.NewReader("")),
+		Request:    req,
+	}
+}
+
+func okPage(req *http.Request) *http.Response {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{},
+		Body:       io.NopCloser(strings.NewReader("<html>")),
+		Request:    req,
+	}
+}
+
+func TestExpandFollowsShortLinkRedirect(t *testing.T) {
+	srv := newTestServer(t)
+	long := "https://www.google.com/maps/place/Gure+Toki/@43.2593,-2.9222,17z/data=!3d43.2593788!4d-2.9222899"
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		switch req.URL.Hostname() {
+		case "maps.app.goo.gl":
+			return redirectTo(req, long), nil
+		case "www.google.com":
+			return okPage(req), nil
+		default:
+			t.Errorf("unexpected outbound host %q", req.URL.Hostname())
+			return okPage(req), nil
+		}
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url=https%3A%2F%2Fmaps.app.goo.gl%2FH8VkkiU1bPjorJEU8", "", "")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d: %s", res.StatusCode, readBody(t, res))
+	}
+	var got map[string]string
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["url"] != long {
+		t.Errorf("url = %q, want %q", got["url"], long)
+	}
+}
+
+func TestExpandUnwrapsConsentWall(t *testing.T) {
+	srv := newTestServer(t)
+	long := "https://www.google.com/maps/place/Gatz/@43.25819,-2.92598,17z"
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		switch req.URL.Hostname() {
+		case "maps.app.goo.gl":
+			return redirectTo(req, "https://consent.google.com/m?continue="+neturl.QueryEscape(long)), nil
+		case "consent.google.com":
+			return okPage(req), nil
+		default:
+			t.Errorf("unexpected outbound host %q", req.URL.Hostname())
+			return okPage(req), nil
+		}
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	var got map[string]string
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["url"] != long {
+		t.Errorf("url = %q, want %q", got["url"], long)
+	}
+}
+
+func TestExpandRefusesToFollowOffGoogleRedirects(t *testing.T) {
+	srv := newTestServer(t)
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() != "maps.app.goo.gl" {
+			t.Errorf("followed redirect to %q — must stop at the short host", req.URL.Hostname())
+			return okPage(req), nil
+		}
+		return redirectTo(req, "https://evil.test/steal"), nil
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	if res.StatusCode != http.StatusBadGateway {
+		t.Errorf("status = %d, want 502", res.StatusCode)
+	}
+}
+
+func TestExpandRejectsNonShortLinks(t *testing.T) {
+	srv := newTestServer(t)
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		t.Errorf("no outbound request should be made, got one to %q", req.URL)
+		return okPage(req), nil
+	})
+	for _, raw := range []string{
+		"",                                 // missing
+		"https://example.com/x",            // arbitrary host — never proxied
+		"https://www.google.com/maps/@1,2", // already a full link, nothing to expand
+		"https://evilmaps.app.goo.gl.io/x", // lookalike host
+		"ftp://maps.app.goo.gl/abc",        // wrong scheme
+		"not a url",
+	} {
+		res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape(raw), "", "")
+		if res.StatusCode != http.StatusBadRequest {
+			t.Errorf("url=%q status = %d, want 400", raw, res.StatusCode)
+		}
+	}
+	res := do(t, http.MethodPost, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	if res.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("POST status = %d, want 405", res.StatusCode)
 	}
 }
 

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseLatLng, parseMapsLink } from "../../web/lib/maps.js";
+import { isShortMapsLink, parseLatLng, parseMapsLink, resolveMapsLink } from "../../web/lib/maps.js";
 import { uid } from "../../web/lib/uid.js";
 
 test("place URL: prefers the precise !3d!4d coords over the @viewport", () => {
@@ -58,3 +58,60 @@ test("links without coordinates return null", () => {
   assert.equal(parseMapsLink(""), null);
   assert.equal(parseMapsLink(null), null);
 });
+
+test("isShortMapsLink recognises the share-sheet hosts and nothing else", () => {
+  assert.ok(isShortMapsLink("https://maps.app.goo.gl/H8VkkiU1bPjorJEU8"));
+  assert.ok(isShortMapsLink("  https://maps.app.goo.gl/abc  ")); // pasted with whitespace
+  assert.ok(isShortMapsLink("https://goo.gl/maps/abc123"));
+  assert.ok(isShortMapsLink("https://g.co/kgs/abc"));
+  assert.ok(!isShortMapsLink("https://www.google.com/maps/@43.263,-2.935,14z"));
+  assert.ok(!isShortMapsLink("https://evilmaps.app.goo.gl.io/x")); // lookalike
+  assert.ok(!isShortMapsLink(""));
+  assert.ok(!isShortMapsLink(null));
+});
+
+// resolveMapsLink reaches for global fetch only on the short-link path; these
+// tests install a scripted stand-in and always remove it after.
+function withFetch(impl, run) {
+  const calls = [];
+  globalThis.fetch = (...args) => { calls.push(args[0]); return impl(...args); };
+  return Promise.resolve(run(calls)).finally(() => { delete globalThis.fetch; });
+}
+
+test("resolveMapsLink parses full links locally without touching the network", () =>
+  withFetch(() => { throw new Error("fetch must not be called"); }, async () => {
+    const place = await resolveMapsLink("https://www.google.com/maps/place/Gure+Toki/@43.2593788,-2.9222899,17z");
+    assert.equal(place.name, "Gure Toki");
+    assert.equal(place.lat, 43.2593788);
+  }));
+
+test("resolveMapsLink expands a short link via /expand and keeps it as the pin URL", () =>
+  withFetch(async () => ({
+    ok: true,
+    json: async () => ({ url: "https://www.google.com/maps/place/Gatz/@43.258,-2.926,17z/data=!3d43.25819!4d-2.92598" }),
+  }), async (calls) => {
+    const place = await resolveMapsLink("https://maps.app.goo.gl/H8VkkiU1bPjorJEU8");
+    assert.equal(place.lat, 43.25819);
+    assert.equal(place.lng, -2.92598);
+    assert.equal(place.name, "Gatz");
+    assert.equal(place.url, "https://maps.app.goo.gl/H8VkkiU1bPjorJEU8");
+    assert.deepEqual(calls, ["/expand?url=" + encodeURIComponent("https://maps.app.goo.gl/H8VkkiU1bPjorJEU8")]);
+  }));
+
+test("resolveMapsLink returns null when /expand fails or yields no coordinates", async () => {
+  await withFetch(async () => ({ ok: false }), async () => {
+    assert.equal(await resolveMapsLink("https://maps.app.goo.gl/abc"), null);
+  });
+  await withFetch(async () => ({ ok: true, json: async () => ({ url: "https://www.google.com/search?q=gatz" }) }), async () => {
+    assert.equal(await resolveMapsLink("https://maps.app.goo.gl/abc"), null);
+  });
+  await withFetch(async () => { throw new Error("network down"); }, async () => {
+    assert.equal(await resolveMapsLink("https://maps.app.goo.gl/abc"), null);
+  });
+});
+
+test("resolveMapsLink returns null for coordinate-less non-short links without fetching", () =>
+  withFetch(() => { throw new Error("fetch must not be called"); }, async () => {
+    assert.equal(await resolveMapsLink("https://maps.google.com/?q=Guggenheim+Bilbao"), null);
+    assert.equal(await resolveMapsLink(""), null);
+  }));
