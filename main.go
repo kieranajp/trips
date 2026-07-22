@@ -151,20 +151,19 @@ func readAtMost(r io.Reader, n int64) []byte {
 const maxPageBytes = 2 << 20
 
 // Newer share links expand to a URL that names the place but carries no
-// coordinates — those only exist inside the page. Dig them out of the
-// server-rendered bits: the og:image static map (its center= is the pin),
-// a canonical /@lat,lng URL, or the APP_INITIALIZATION_STATE bootstrap
-// (which stores lng before lat).
+// coordinates — those only exist inside the page. Only scrape bits that
+// locate the *place* itself: the og:image static map (its center= is the
+// pin) and the !3d<lat>!4d<lng> data blob from the canonical URL. The page
+// also carries the map camera (/@lat,lng in URLs, APP_INITIALIZATION_STATE)
+// — never scrape that: when the shared URL has no viewport, Google centres
+// the camera by IP-geolocating the requester, i.e. wherever this server is
+// running. Self-hosted at home, that pinned every such link to the house.
 var pageCenterRe = regexp.MustCompile(`center=(-?\d[\d.]*)(?:%2C|,)(-?\d[\d.]*)`)
-var pageAtRe = regexp.MustCompile(`/@(-?\d[\d.]*),(-?\d[\d.]*)`)
-var pageInitRe = regexp.MustCompile(`APP_INITIALIZATION_STATE=\[\[\[-?[\d.]+,(-?\d[\d.]*),(-?\d[\d.]*)`)
+var pagePinRe = regexp.MustCompile(`!3d(-?\d[\d.]*)!4d(-?\d[\d.]*)`)
 
 func pageCoords(body []byte) (lat, lng float64, ok bool) {
-	for _, probe := range []struct {
-		re      *regexp.Regexp
-		swapped bool // lng captured before lat
-	}{{pageCenterRe, false}, {pageAtRe, false}, {pageInitRe, true}} {
-		m := probe.re.FindSubmatch(body)
+	for _, re := range []*regexp.Regexp{pageCenterRe, pagePinRe} {
+		m := re.FindSubmatch(body)
 		if m == nil {
 			continue
 		}
@@ -172,9 +171,6 @@ func pageCoords(body []byte) (lat, lng float64, ok bool) {
 		b, errB := strconv.ParseFloat(string(m[2]), 64)
 		if errA != nil || errB != nil {
 			continue
-		}
-		if probe.swapped {
-			return b, a, true
 		}
 		return a, b, true
 	}
