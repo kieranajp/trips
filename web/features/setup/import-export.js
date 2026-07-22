@@ -58,7 +58,8 @@ function importJson(data) {
   toast("Imported");
 }
 
-function parseCsv(text) {
+// Exported for tests.
+export function parseCsv(text) {
   const rows = [];
   let row = [];
   let field = "";
