@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -11,8 +10,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
+
+type config struct {
+	GooglePlacesAPIKey string `envconfig:"GOOGLE_PLACES_API_KEY" required:"true"`
+}
 
 type entry struct {
 	cid, name string
@@ -42,10 +47,12 @@ var seeds = []entry{
 }
 
 func main() {
-	key := apiKey()
-	if key == "" {
-		log.Fatal("GOOGLE_PLACES_API_KEY not set")
+	_ = godotenv.Load()
+	var cfg config
+	if err := envconfig.Process("", &cfg); err != nil {
+		log.Fatal("GOOGLE_PLACES_API_KEY not set (checked .env and env): ", err)
 	}
+	key := cfg.GooglePlacesAPIKey
 	for _, e := range seeds {
 		uri := searchURI(key, e)
 		if uri == "" {
@@ -84,22 +91,4 @@ func searchURI(key string, e entry) string {
 		return ""
 	}
 	return out.Places[0].GoogleMapsURI
-}
-
-func apiKey() string {
-	if k := os.Getenv("GOOGLE_PLACES_API_KEY"); k != "" {
-		return k
-	}
-	f, err := os.Open(".env")
-	if err != nil {
-		return ""
-	}
-	defer f.Close()
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		if v, ok := strings.CutPrefix(strings.TrimSpace(s.Text()), "GOOGLE_PLACES_API_KEY="); ok {
-			return strings.Trim(strings.TrimSpace(v), `"'`)
-		}
-	}
-	return ""
 }

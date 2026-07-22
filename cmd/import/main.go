@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
@@ -14,7 +13,14 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
+
+type config struct {
+	GooglePlacesAPIKey string `envconfig:"GOOGLE_PLACES_API_KEY" required:"true"`
+}
 
 const csvPath = "Takeout/Saved/Bilbao.csv"
 const outPath = "bilbao-import.json"
@@ -48,10 +54,12 @@ type pin struct {
 }
 
 func main() {
-	key := apiKey()
-	if key == "" {
-		log.Fatal("GOOGLE_PLACES_API_KEY not set (checked .env and env)")
+	_ = godotenv.Load()
+	var cfg config
+	if err := envconfig.Process("", &cfg); err != nil {
+		log.Fatal("GOOGLE_PLACES_API_KEY not set (checked .env and env): ", err)
 	}
+	key := cfg.GooglePlacesAPIKey
 
 	f, err := os.Open(csvPath)
 	if err != nil {
@@ -140,25 +148,6 @@ func searchText(key, name string) (lat, lng float64, uri string, ok bool) {
 	}
 	p := out.Places[0]
 	return p.Location.Latitude, p.Location.Longitude, p.GoogleMapsURI, true
-}
-
-func apiKey() string {
-	if k := os.Getenv("GOOGLE_PLACES_API_KEY"); k != "" {
-		return k
-	}
-	f, err := os.Open(".env")
-	if err != nil {
-		return ""
-	}
-	defer f.Close()
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		line := strings.TrimSpace(s.Text())
-		if v, found := strings.CutPrefix(line, "GOOGLE_PLACES_API_KEY="); found {
-			return strings.Trim(strings.TrimSpace(v), `"'`)
-		}
-	}
-	return ""
 }
 
 func firstNonEmpty(a, b string) string {

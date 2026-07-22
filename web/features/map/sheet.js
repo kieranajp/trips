@@ -19,6 +19,11 @@ export function initSheet(view, side, handle) {
   let raf = 0;
 
   const total = () => view.clientHeight || window.innerHeight;
+  // Same guard as state/persistence.js: some privacy modes throw on any
+  // localStorage access, and sync() runs on every viewport change.
+  const savedFrac = () => {
+    try { return parseFloat(localStorage.getItem(KEY)); } catch { return NaN; }
+  };
   const clampPx = (px) => {
     const t = total();
     return Math.max(t * 0.12, Math.min(t * 0.94, px));
@@ -65,7 +70,7 @@ export function initSheet(view, side, handle) {
   const sync = () => {
     if (dragging) return;
     if (mq.matches) {
-      const saved = parseFloat(localStorage.getItem(KEY));
+      const saved = savedFrac();
       side.style.transition = "none";
       setFrac(saved > 0 && saved < 1 ? saved : DEFAULT);
     } else {

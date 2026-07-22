@@ -1,6 +1,7 @@
 import { cats, pins, trip } from "../../state/signals.js";
 import { addPin, toast } from "../../state/actions.js";
 import { save } from "../../state/persistence.js";
+import { uid } from "../../lib/uid.js";
 
 export function exportJson() {
   const data = JSON.stringify({
@@ -36,10 +37,12 @@ function isDuplicate(lat, lng, name) {
     && Math.abs(pin.lng - lng) < 1e-4);
 }
 
-function importJson(data) {
+// Exported for tests.
+export function importJson(data) {
+  // Either branch must leave every pin with an id — remove/fly-to target by it.
   if (!confirm("Merge with what's here?  OK = merge · Cancel = replace everything")) {
     cats.value = data.categories;
-    pins.value = data.pins;
+    pins.value = data.pins.map((pin) => (pin.id ? pin : { ...pin, id: uid("p_") }));
   } else {
     const categories = [...cats.value];
     data.categories.forEach((category) => {
@@ -48,7 +51,7 @@ function importJson(data) {
     const importedPins = [...pins.value];
     data.pins.forEach((pin) => {
       if (!isDuplicate(pin.lat, pin.lng, pin.name)) {
-        importedPins.push({ ...pin, id: pin.id || "p_" + Math.random().toString(36).slice(2) });
+        importedPins.push({ ...pin, id: pin.id || uid("p_") });
       }
     });
     cats.value = categories;
@@ -58,7 +61,8 @@ function importJson(data) {
   toast("Imported");
 }
 
-function parseCsv(text) {
+// Exported for tests.
+export function parseCsv(text) {
   const rows = [];
   let row = [];
   let field = "";
@@ -109,6 +113,7 @@ async function importCsv(text) {
   if (!items.length) { toast("Nothing new to import"); return; }
   if (!cats.value.some((category) => category.id === "saved")) {
     cats.value = [...cats.value, { id: "saved", name: "Saved", color: "#5b6672" }];
+    save(); // persist even if every row below turns out to be a duplicate
   }
   const hint = trip.value.geocodeHint;
   const [centerLat, centerLng] = trip.value.geocodeCenter || trip.value.center;
@@ -125,7 +130,7 @@ async function importCsv(text) {
       failed++;
     }
     if (!isDuplicate(lat, lng, name)) {
-      addPin({ id: "p_" + Math.random().toString(36).slice(2), name, lat, lng, cat: "saved", note, src: null });
+      addPin({ id: uid("p_"), name, lat, lng, cat: "saved", note, src: null });
       added++;
     }
     if (i < items.length - 1) await sleep(1100);

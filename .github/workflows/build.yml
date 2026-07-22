@@ -22,9 +22,21 @@ jobs:
       - run: go build ./...
       - run: go test ./...
 
+  js-test:
+    name: "JS: Test"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # Node's built-in test runner, zero dependencies — the runner's
+      # preinstalled Node (22+) is all it needs. No npm install.
+      - run: node --version
+      - run: npm test
+
   docker-push:
     name: "Docker: Build & Push"
-    needs: [go-test]
+    needs: [go-test, js-test]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:

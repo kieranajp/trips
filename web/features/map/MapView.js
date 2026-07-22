@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
-import { areasOn, cats, editing, only, pinMatches, pins, search, tab, trip } from "../../state/signals.js";
+import { areasOn, cats, editing, only, search, searchedPins, tab, trip, visiblePins } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toast } from "../../state/actions.js";
 import { MAPS_LINK_HINT, parseMapsLink } from "../../lib/maps.js";
@@ -22,7 +22,7 @@ function Filters() {
     <div class="filters">
       <span class="flabel">${only.value ? "Showing one — tap again for all" : "Tap to show only"}</span>
       ${cats.value.map((category) => {
-        const count = pins.value.filter((pin) => pin.cat === category.id && pinMatches(pin, search.value)).length;
+        const count = searchedPins.value.filter((pin) => pin.cat === category.id).length;
         const active = only.value === category.id;
         return html`<span class=${"chip" + (active ? " on" : "") + (only.value && !active ? " off" : "")}
           title="Show only this" onClick=${() => toggleOnly(category.id)}>
@@ -32,8 +32,7 @@ function Filters() {
 }
 
 function PinList() {
-  const visible = pins.value.filter((pin) =>
-    (!only.value || pin.cat === only.value) && pinMatches(pin, search.value));
+  const visible = visiblePins.value; // same computed the map markers render from
   if (!visible.length) {
     const empty = search.value.trim()
       ? html`<div class="empty">No pins match “${search.value.trim()}”.</div>`

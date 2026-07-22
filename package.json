@@ -1,0 +1,8 @@
+{
+  "name": "trips",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --import ./tests/js/register.mjs --test \"tests/js/*.test.js\""
+  }
+}
