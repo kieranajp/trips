@@ -583,3 +583,55 @@ func TestWhoamiEchoesIdentityHeaders(t *testing.T) {
 		t.Errorf("Cache-Control = %q, want no-store", cc)
 	}
 }
+
+// TestPWAAssetsEmbedded checks the installability wiring against the real
+// embedded FS: the manifest parses, every icon it points at is actually
+// embedded, and the shell links the manifest + registers the service worker.
+// Catches the classic PWA rot: renaming/moving an icon without updating the
+// manifest (or vice versa) breaks install silently.
+func TestPWAAssetsEmbedded(t *testing.T) {
+	manifest, err := webFS.ReadFile("web/manifest.json")
+	if err != nil {
+		t.Fatalf("manifest.json not embedded: %v", err)
+	}
+	var m struct {
+		StartURL string `json:"start_url"`
+		Display  string `json:"display"`
+		Icons    []struct {
+			Src string `json:"src"`
+		} `json:"icons"`
+	}
+	if err := json.Unmarshal(manifest, &m); err != nil {
+		t.Fatalf("manifest.json invalid: %v", err)
+	}
+	if m.StartURL != "/" || m.Display != "standalone" {
+		t.Errorf("manifest start_url=%q display=%q, want / and standalone", m.StartURL, m.Display)
+	}
+	if len(m.Icons) == 0 {
+		t.Error("manifest has no icons")
+	}
+	for _, ic := range m.Icons {
+		if _, err := webFS.ReadFile("web" + ic.Src); err != nil {
+			t.Errorf("manifest icon %s not embedded: %v", ic.Src, err)
+		}
+	}
+	if _, err := webFS.ReadFile("web/sw.js"); err != nil {
+		t.Errorf("sw.js not embedded: %v", err)
+	}
+	index, err := webFS.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`rel="manifest"`, `rel="apple-touch-icon"`, `name="theme-color"`} {
+		if !strings.Contains(string(index), want) {
+			t.Errorf("index.html missing %s", want)
+		}
+	}
+	app, err := webFS.ReadFile("web/app.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(app), `serviceWorker.register("/sw.js")`) {
+		t.Error("app.js does not register /sw.js")
+	}
+}
