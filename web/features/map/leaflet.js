@@ -3,6 +3,7 @@ import { areasOn, catById, editing, pins, stays, trip, visiblePins } from "../..
 import { escapeHtml } from "../../lib/html.js";
 import { homeIconSpec, pinIconSpec } from "./icons.js";
 import { neighbourhoodPopupHtml, pinPopupHtml, stayPopupHtml } from "./popups.js";
+import { followPermalink, sharePin } from "./permalink.js";
 
 const hasCoords = (place) => place
   && place.lat != null && place.lng != null
@@ -48,11 +49,14 @@ export function createTripMap(element, definition, L = window.L) {
       const marker = L.marker([pin.lat, pin.lng], { icon }).addTo(markerLayer);
       marker.bindPopup(pinPopupHtml(pin));
       marker.on("popupopen", (event) => {
-        const button = event.popup._contentNode.querySelector("[data-edit]");
-        if (button) button.onclick = () => {
+        const content = event.popup._contentNode;
+        const editButton = content.querySelector("[data-edit]");
+        if (editButton) editButton.onclick = () => {
           map.closePopup();
           editing.value = { pin: pins.value.find((item) => item.id === pin.id) };
         };
+        const shareButton = content.querySelector("[data-share]");
+        if (shareButton) shareButton.onclick = () => sharePin(pin);
       });
       markers[pin.id] = marker;
     });
@@ -108,7 +112,10 @@ export function createTripMap(element, definition, L = window.L) {
 let instance = null;
 
 export function mountMap(element) {
-  if (!instance) instance = createTripMap(element, trip.value);
+  if (!instance) {
+    instance = createTripMap(element, trip.value);
+    followPermalink(instance);
+  }
   return instance;
 }
 

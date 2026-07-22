@@ -53,6 +53,12 @@ test("pinPopupHtml only offers Edit when logged in", () => {
   assert.ok(pinPopupHtml(pin).includes("data-edit"));
 });
 
+test("pinPopupHtml offers Share to everyone, with the id escaped", () => {
+  assert.ok(pinPopupHtml({ id: "p_1", cat: "pintxos", name: "Bar" }).includes(`data-share="p_1"`));
+  const html = pinPopupHtml({ id: `x" onclick="p`, cat: "pintxos", name: "Bar" });
+  assert.ok(html.includes(`data-share="x&quot; onclick=&quot;p"`));
+});
+
 test("stayPopupHtml escapes name and address", () => {
   const html = stayPopupHtml({ name: `<i>Hotel</i>`, address: `1 "Main" St`, url: "javascript:x" });
   assert.ok(!html.includes("<i>"));
