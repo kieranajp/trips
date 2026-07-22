@@ -9,8 +9,10 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -66,6 +68,7 @@ func newMux(web fs.FS) *http.ServeMux {
 	mux.HandleFunc("/login", loginHandler)
 	mux.HandleFunc("/state", stateHandler)
 	mux.HandleFunc("/files", filesHandler)
+	mux.HandleFunc("/expand", expandHandler)
 	mux.Handle("/", http.FileServer(http.FS(web)))
 	return mux
 }
@@ -93,6 +96,71 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		next = "/"
 	}
 	http.Redirect(w, r, next, http.StatusFound)
+}
+
+// The only hosts /expand will fetch: the short-link domains Google Maps
+// "share" hands out. Everything else is rejected up front — this endpoint
+// must never become a proxy for arbitrary URLs.
+var shortMapsHostRe = regexp.MustCompile(`^(maps\.app\.goo\.gl|goo\.gl|g\.co)$`)
+
+// Hosts a short link may redirect through: the short domains themselves plus
+// Google properties (www/maps/consent on any google TLD). A hop anywhere else
+// stops the chain instead of being followed.
+var googleHostRe = regexp.MustCompile(`^((www|maps|consent)\.)?google(\.com?)?(\.[a-z]{2})?$`)
+
+var expandClient = &http.Client{
+	Timeout: 10 * time.Second,
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		host := req.URL.Hostname()
+		if len(via) >= 10 || (!shortMapsHostRe.MatchString(host) && !googleHostRe.MatchString(host)) {
+			return http.ErrUseLastResponse
+		}
+		return nil
+	},
+}
+
+// expandHandler resolves a Google Maps short link (maps.app.goo.gl and
+// friends) to the full URL it redirects to, so the frontend can pull
+// coordinates out of it. The browser can't do this itself: CORS hides the
+// Location header of a cross-origin redirect.
+func expandHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	target, err := url.Parse(r.URL.Query().Get("url"))
+	if err != nil || (target.Scheme != "http" && target.Scheme != "https") || !shortMapsHostRe.MatchString(target.Hostname()) {
+		http.Error(w, "not a Google Maps short link", http.StatusBadRequest)
+		return
+	}
+	target.Scheme = "https"
+	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, target.String(), nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	res, err := expandClient.Do(req)
+	if err != nil {
+		http.Error(w, "could not expand link", http.StatusBadGateway)
+		return
+	}
+	res.Body.Close() // only the final URL matters, never the page
+	final := res.Request.URL
+	// The EU consent wall wraps the real destination in a continue param.
+	if final.Hostname() == "consent.google.com" {
+		if next, err := url.Parse(final.Query().Get("continue")); err == nil && next.Host != "" {
+			final = next
+		}
+	}
+	// Still on a short host means the chain went somewhere we refused to
+	// follow (or Google didn't redirect at all) — that's a failure, not a
+	// result the frontend could parse coordinates from.
+	if shortMapsHostRe.MatchString(final.Hostname()) {
+		http.Error(w, "could not expand link", http.StatusBadGateway)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"url": final.String()})
 }
 
 func stateHandler(w http.ResponseWriter, r *http.Request) {

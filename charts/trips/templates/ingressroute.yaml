@@ -42,14 +42,26 @@ spec:
       services:
         - name: {{ .Release.Name }}
           port: {{ .Values.app.service.port }}
-    # 4. Public reads: anyone can view the site and pull trip state. No auth.
+    # 4. Short-link expander (/expand) — makes an outbound request to Google
+    #    on the caller's behalf, so it's for editors only: gated even though
+    #    it's a GET, ahead of the public-GET rule below.
+    - kind: Rule
+      priority: 84
+      match: Host(`{{ .Values.ingress.host }}`) && Path(`/expand`)
+      middlewares:
+        - name: auth-private
+          namespace: auth
+      services:
+        - name: {{ .Release.Name }}
+          port: {{ .Values.app.service.port }}
+    # 5. Public reads: anyone can view the site and pull trip state. No auth.
     - kind: Rule
       priority: 80
       match: Host(`{{ .Values.ingress.host }}`) && (Method(`GET`) || Method(`HEAD`) || Method(`OPTIONS`))
       services:
         - name: {{ .Release.Name }}
           port: {{ .Values.app.service.port }}
-    # 5. Everything else — PUT (the only write today) plus any future
+    # 6. Everything else — PUT (the only write today) plus any future
     #    POST/PATCH/DELETE — requires a valid Google session. Default closed:
     #    a new write verb is gated automatically without touching this file.
     - kind: Rule
