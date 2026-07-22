@@ -1,6 +1,6 @@
 import { effect } from "@preact/signals";
 import { areasOn, catById, editing, only, pinMatches, pins, search, stays, trip } from "../../state/signals.js";
-import { canEdit } from "../../state/auth.js";
+import { escapeHtml, neighbourhoodPopupHtml, pinPopupHtml, stayPopupHtml } from "./popups.js";
 
 const L = window.L;
 let map;
@@ -12,13 +12,6 @@ const markers = {};
 const hasCoords = (place) => place
   && place.lat != null && place.lng != null
   && !Number.isNaN(+place.lat) && !Number.isNaN(+place.lng);
-
-const escapeHtml = (value) => String(value ?? "").replace(/[&<>"]/g, (character) => ({
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-}[character]));
 
 function pinIcon(color) {
   return L.divIcon({
@@ -32,19 +25,6 @@ function pinIcon(color) {
   });
 }
 
-const mapsUrl = (pin) => pin.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pin.name)}`;
-
-function popupHtml(pin) {
-  const category = catById(pin.cat);
-  return `<div class="pop-tag" style="color:${category.color}">${escapeHtml(category.name)}</div>
-    <div class="pop-nm">${escapeHtml(pin.name)}</div>
-    ${pin.note ? `<p class="pop-nt">${escapeHtml(pin.note)}</p>` : ""}
-    <div class="pop-links">
-      <a href="${mapsUrl(pin)}" target="_blank" rel="noopener">Open in Maps ↗</a>
-      ${canEdit.value ? `<button data-edit="${pin.id}">Edit</button>` : ""}
-    </div>`;
-}
-
 function renderMarkers() {
   if (!markerLayer) return;
   markerLayer.clearLayers();
@@ -54,7 +34,7 @@ function renderMarkers() {
     if (!pinMatches(pin, search.value)) return;
     const category = catById(pin.cat);
     const marker = L.marker([pin.lat, pin.lng], { icon: pinIcon(category.color) }).addTo(markerLayer);
-    marker.bindPopup(popupHtml(pin));
+    marker.bindPopup(pinPopupHtml(pin));
     marker.on("popupopen", (event) => {
       const button = event.popup._contentNode.querySelector("[data-edit]");
       if (button) button.onclick = () => {
@@ -86,10 +66,7 @@ function renderStays() {
   stays.value.forEach((stay) => {
     if (!hasCoords(stay)) return;
     L.marker([+stay.lat, +stay.lng], { icon: homeIcon(), zIndexOffset: 1000 }).addTo(stayLayer)
-      .bindPopup(`<div class="pop-tag" style="color:#1c2321">Your stay</div>
-        <div class="pop-nm">${escapeHtml(stay.name)}</div>
-        ${stay.address ? `<p class="pop-nt">${escapeHtml(stay.address)}</p>` : ""}
-        <div class="pop-links"><a href="${mapsUrl(stay)}" target="_blank" rel="noopener">Open in Maps ↗</a></div>`);
+      .bindPopup(stayPopupHtml(stay));
   });
 }
 
@@ -103,9 +80,8 @@ function buildNeighbourhoodLayer(definition) {
       fillColor: neighbourhood.color,
       fillOpacity: 0.1,
     });
-    polygon.bindPopup(`<div class="pop-tag" style="color:${neighbourhood.color}">Neighbourhood</div>
-      <div class="pop-nm">${escapeHtml(neighbourhood.name)}</div><p class="pop-nt">${escapeHtml(neighbourhood.note)}</p>`, { maxWidth: 250 });
-    polygon.bindTooltip(neighbourhood.name, { permanent: true, direction: "center", className: "nb-label" });
+    polygon.bindPopup(neighbourhoodPopupHtml(neighbourhood), { maxWidth: 250 });
+    polygon.bindTooltip(escapeHtml(neighbourhood.name), { permanent: true, direction: "center", className: "nb-label" });
     layer.addLayer(polygon);
   });
   return layer;

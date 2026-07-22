@@ -37,10 +37,12 @@ function isDuplicate(lat, lng, name) {
     && Math.abs(pin.lng - lng) < 1e-4);
 }
 
-function importJson(data) {
+// Exported for tests.
+export function importJson(data) {
+  // Either branch must leave every pin with an id — remove/fly-to target by it.
   if (!confirm("Merge with what's here?  OK = merge · Cancel = replace everything")) {
     cats.value = data.categories;
-    pins.value = data.pins;
+    pins.value = data.pins.map((pin) => (pin.id ? pin : { ...pin, id: uid("p_") }));
   } else {
     const categories = [...cats.value];
     data.categories.forEach((category) => {

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"embed"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/fs"
 	"log"
@@ -113,9 +114,15 @@ func stateHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	case http.MethodPut:
-		body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20)) // ponytail: 1MB cap, a bar list never gets near it
+		// ponytail: 1MB cap, a bar list never gets near it. MaxBytesReader (not
+		// LimitReader) so an oversized body is rejected outright rather than
+		// silently truncated into corrupt JSON.
+		body, err := readCapped(w, r, 1<<20)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			return // readCapped already wrote the status
+		}
+		if !json.Valid(body) {
+			http.Error(w, "state must be valid JSON", http.StatusBadRequest)
 			return
 		}
 		if _, err := db.Exec(
@@ -178,10 +185,11 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(list)
 	case http.MethodPost:
-		body, err := io.ReadAll(io.LimitReader(r.Body, 10<<20)) // ponytail: 10MB cap, a boarding-pass PDF/photo is well under
+		// ponytail: 10MB cap, a boarding-pass PDF/photo is well under. Rejected,
+		// not truncated — a silently clipped PDF would store fine and open broken.
+		body, err := readCapped(w, r, 10<<20)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return // readCapped already wrote the status
 		}
 		res, err := db.Exec(`INSERT INTO file(trip,name,type,data,updated_at) VALUES(?,?,?,?,unixepoch())`,
 			tripID, r.URL.Query().Get("name"), r.Header.Get("Content-Type"), body)
@@ -201,6 +209,23 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// readCapped reads the whole request body up to limit bytes. Anything larger
+// is answered with 413 (and any other read failure with 400); callers just
+// bail on error.
+func readCapped(w http.ResponseWriter, r *http.Request, limit int64) ([]byte, error) {
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, limit))
+	if err != nil {
+		var tooBig *http.MaxBytesError
+		if errors.As(err, &tooBig) {
+			http.Error(w, "body too large", http.StatusRequestEntityTooLarge)
+		} else {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		return nil, err
+	}
+	return body, nil
 }
 
 func main() {

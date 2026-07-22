@@ -111,6 +111,53 @@ func TestStateRoundTrip(t *testing.T) {
 	}
 }
 
+func TestStatePutRejectsOversizedBody(t *testing.T) {
+	srv := newTestServer(t)
+	do(t, http.MethodPut, srv.URL+"/state?trip=bilbao", "application/json", `{"pins":[]}`)
+
+	// >1MB must 413, not get truncated into corrupt JSON and stored.
+	big := `{"pad":"` + strings.Repeat("x", 1<<20) + `"}`
+	res := do(t, http.MethodPut, srv.URL+"/state?trip=bilbao", "application/json", big)
+	if res.StatusCode != http.StatusRequestEntityTooLarge {
+		t.Fatalf("oversized PUT status = %d, want 413", res.StatusCode)
+	}
+
+	res = do(t, http.MethodGet, srv.URL+"/state?trip=bilbao", "", "")
+	if got := readBody(t, res); got != `{"pins":[]}` {
+		t.Errorf("state after rejected PUT = %q, want previous state intact", got)
+	}
+}
+
+func TestStatePutRejectsNonJSON(t *testing.T) {
+	srv := newTestServer(t)
+	do(t, http.MethodPut, srv.URL+"/state?trip=bilbao", "application/json", `{"pins":[]}`)
+
+	for _, body := range []string{"", "not json", `{"pins":`} {
+		res := do(t, http.MethodPut, srv.URL+"/state?trip=bilbao", "application/json", body)
+		if res.StatusCode != http.StatusBadRequest {
+			t.Errorf("PUT %q status = %d, want 400", body, res.StatusCode)
+		}
+	}
+
+	res := do(t, http.MethodGet, srv.URL+"/state?trip=bilbao", "", "")
+	if got := readBody(t, res); got != `{"pins":[]}` {
+		t.Errorf("state after rejected PUTs = %q, want previous state intact", got)
+	}
+}
+
+func TestFilesPostRejectsOversizedBody(t *testing.T) {
+	srv := newTestServer(t)
+	res := do(t, http.MethodPost, srv.URL+"/files?trip=bilbao&name=huge.pdf", "application/pdf",
+		strings.Repeat("x", 10<<20+1))
+	if res.StatusCode != http.StatusRequestEntityTooLarge {
+		t.Fatalf("oversized POST status = %d, want 413", res.StatusCode)
+	}
+	res = do(t, http.MethodGet, srv.URL+"/files?trip=bilbao", "", "")
+	if got := strings.TrimSpace(readBody(t, res)); got != "[]" {
+		t.Errorf("file list after rejected upload = %q, want []", got)
+	}
+}
+
 func TestStateRejectsBadTripAndMethod(t *testing.T) {
 	srv := newTestServer(t)
 	for _, url := range []string{
