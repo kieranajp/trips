@@ -407,6 +407,67 @@ func TestExpandScrapesCoordsFromCoordinatelessPlacePage(t *testing.T) {
 	}
 }
 
+func TestExpandScrapesPinCoordsFromCanonicalDataBlob(t *testing.T) {
+	srv := newTestServer(t)
+	// No og:image static map — the pin only exists in the !3d/!4d blob of the
+	// canonical URL embedded in the page.
+	long := "https://www.google.com/maps/place/Gure+Toki,+Plaza+Barria,+12/data=!4m2!3m1!1s0xdead:0xbeef"
+	page := `<html><head>
+<meta content="Google Maps" property="og:title">
+<link rel="canonical" href="https://www.google.com/maps/place/Gure+Toki/@43.2593788,-2.9222899,17z/data=!3m1!4b1!4m6!3m5!1s0xdead:0xbeef!8m2!3d43.2593788!4d-2.9222899">
+</head><body></body></html>`
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() == "maps.app.goo.gl" {
+			return redirectTo(req, long), nil
+		}
+		return pageWith(req, page), nil
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	var got struct {
+		Lat float64 `json:"lat"`
+		Lng float64 `json:"lng"`
+	}
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Lat != 43.2593788 || got.Lng != -2.9222899 {
+		t.Errorf("coords = %v,%v, want 43.2593788,-2.9222899", got.Lat, got.Lng)
+	}
+}
+
+func TestExpandNeverScrapesCameraCoords(t *testing.T) {
+	srv := newTestServer(t)
+	// A page with no place pin at all — only the map *camera*, which Google
+	// centres by IP-geolocating the requester (this server). Scraping it pinned
+	// every coordinate-less share link to wherever the server runs, so the
+	// response must omit lat/lng entirely rather than return the camera.
+	long := "https://www.google.com/maps/place/Gure+Toki/data=!4m2!3m1!1s0xdead:0xbeef"
+	page := `<html><head>
+<meta content="Google Maps" property="og:title">
+<meta content="https://www.google.com/maps/@52.5170365,13.3888599,12z" property="og:url">
+</head><body><script>window.APP_INITIALIZATION_STATE=[[[12.0,13.3888599,52.5170365]]];</script></body></html>`
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() == "maps.app.goo.gl" {
+			return redirectTo(req, long), nil
+		}
+		return pageWith(req, page), nil
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d: %s", res.StatusCode, readBody(t, res))
+	}
+	var got map[string]any
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := got["lat"]; ok {
+		t.Errorf("response includes lat=%v scraped from the camera — must omit coords instead", got["lat"])
+	}
+	if got["url"] != long {
+		t.Errorf("url = %v, want %q", got["url"], long)
+	}
+}
+
 func TestExpandNameFallsBackToOgTitleWithoutPlacePath(t *testing.T) {
 	srv := newTestServer(t)
 	// A /@lat,lng URL shape carries no /place/ segment, so the name must come
