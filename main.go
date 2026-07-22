@@ -182,8 +182,20 @@ func pageCoords(body []byte) (lat, lng float64, ok bool) {
 }
 
 var ogTitleRe = regexp.MustCompile(`property="og:title"[^>]*content="([^"]*)"|content="([^"]*)"[^>]*property="og:title"`)
+var placePathRe = regexp.MustCompile(`/place/([^/@]+)`)
 
-func pageName(body []byte) string {
+// placeName picks a human name for the pin. The expanded URL path is the
+// reliable source — Google formats it "/place/Nikko,+Máximo+Aguirre..." — so
+// take the segment before the first comma. og:title is only a fallback: on
+// newer share pages it's the generic "Google Maps", useless as a pin name.
+func placeName(final *url.URL, body []byte) string {
+	if m := placePathRe.FindStringSubmatch(final.Path); m != nil {
+		// final.Path is already percent-decoded; Google still uses + for spaces.
+		name, _, _ := strings.Cut(strings.ReplaceAll(m[1], "+", " "), ",")
+		if name = strings.TrimSpace(name); name != "" {
+			return name
+		}
+	}
 	m := ogTitleRe.FindSubmatch(body)
 	if m == nil {
 		return ""
@@ -194,7 +206,10 @@ func pageName(body []byte) string {
 	}
 	// og:title reads "Name · Street address" — keep just the name.
 	title, _, _ = strings.Cut(title, " · ")
-	return html.UnescapeString(title)
+	if title = html.UnescapeString(strings.TrimSpace(title)); title != "" && title != "Google Maps" {
+		return title
+	}
+	return ""
 }
 
 // expandHandler resolves a Google Maps short link (maps.app.goo.gl and
@@ -263,7 +278,7 @@ func expandHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out := map[string]any{"url": final.String()}
-	if name := pageName(body); name != "" {
+	if name := placeName(final, body); name != "" {
 		out["name"] = name
 	}
 	lat, lng, ok := pageCoords(body)

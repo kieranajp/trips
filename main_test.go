@@ -339,11 +339,12 @@ func TestExpandFollowsShortLinkRedirect(t *testing.T) {
 	}
 }
 
-// placePage mimics the server-rendered head of a maps place page: og:title
-// with the name, og:image a static map centred on the pin. This is all the
-// coordinate data newer share links expose — their URLs carry none.
+// placePage mimics the server-rendered head of a real maps place page: the
+// og:title is the useless generic "Google Maps" (verified against a live
+// share link), and the pin's coordinates live only in the og:image static
+// map's center=. The place name comes from the expanded URL path, not here.
 const placePage = `<html><head>
-<meta content="Gure Toki &amp; Co · Plaza Barria, 12, Casco Viejo" property="og:title">
+<meta content="Google Maps" property="og:title">
 <meta content="https://maps.google.com/maps/api/staticmap?center=43.2593788%2C-2.9222899&amp;zoom=15" property="og:image">
 </head><body></body></html>`
 
@@ -358,7 +359,8 @@ func pageWith(req *http.Request, body string) *http.Response {
 
 func TestExpandScrapesCoordsFromCoordinatelessPlacePage(t *testing.T) {
 	srv := newTestServer(t)
-	long := "https://www.google.com/maps/place/Gure+Toki/data=!4m2!3m1!1s0xdead:0xbeef"
+	// A real expanded link: name in the path, place id in data=, no coords.
+	long := "https://www.google.com/maps/place/Gure+Toki,+Plaza+Barria,+12/data=!4m2!3m1!1s0xdead:0xbeef"
 	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
 		switch req.URL.Hostname() {
 		case "maps.app.goo.gl":
@@ -398,8 +400,39 @@ func TestExpandScrapesCoordsFromCoordinatelessPlacePage(t *testing.T) {
 	if got.Lat != 43.2593788 || got.Lng != -2.9222899 {
 		t.Errorf("coords = %v,%v, want 43.2593788,-2.9222899", got.Lat, got.Lng)
 	}
-	if got.Name != "Gure Toki & Co" {
-		t.Errorf("name = %q, want %q (address trimmed, entities decoded)", got.Name, "Gure Toki & Co")
+	// Name comes from the /place/ path (trimmed at the first comma), NOT the
+	// generic "Google Maps" og:title.
+	if got.Name != "Gure Toki" {
+		t.Errorf("name = %q, want %q", got.Name, "Gure Toki")
+	}
+}
+
+func TestExpandNameFallsBackToOgTitleWithoutPlacePath(t *testing.T) {
+	srv := newTestServer(t)
+	// A /@lat,lng URL shape carries no /place/ segment, so the name must come
+	// from a non-generic og:title instead.
+	long := "https://www.google.com/maps/@43.2593788,-2.9222899,17z"
+	page := `<html><head><meta property="og:title" content="Gatz · Bilbao"></head></html>`
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() == "maps.app.goo.gl" {
+			return redirectTo(req, long), nil
+		}
+		return pageWith(req, page), nil
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	var got struct {
+		URL  string `json:"url"`
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Name != "Gatz" {
+		t.Errorf("name = %q, want %q (og:title fallback, address trimmed)", got.Name, "Gatz")
+	}
+	// The @lat,lng coords stay in the returned URL for the frontend to parse.
+	if got.URL != long {
+		t.Errorf("url = %q, want %q", got.URL, long)
 	}
 }
 
