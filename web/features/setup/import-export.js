@@ -113,6 +113,7 @@ async function importCsv(text) {
   if (!items.length) { toast("Nothing new to import"); return; }
   if (!cats.value.some((category) => category.id === "saved")) {
     cats.value = [...cats.value, { id: "saved", name: "Saved", color: "#5b6672" }];
+    save(); // persist even if every row below turns out to be a duplicate
   }
   const hint = trip.value.geocodeHint;
   const [centerLat, centerLng] = trip.value.geocodeCenter || trip.value.center;
