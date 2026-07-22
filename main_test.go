@@ -468,6 +468,81 @@ func TestExpandNeverScrapesCameraCoords(t *testing.T) {
 	}
 }
 
+// The newest share links expand to a page with no place data at all: the
+// og:image static map is centred on Google's "location unknown" default (the
+// middle of the USA) and the URL's data blob carries only the feature id.
+// The handler must reject that default centre and resolve the pin through
+// the embed render instead. Regression: a real Bilbao link pinned to Kansas.
+func TestExpandResolvesCoordinatelessLinkThroughEmbed(t *testing.T) {
+	srv := newTestServer(t)
+	long := "https://www.google.com/maps/place/El+Corte+Ingl%C3%A9s+Gran+V%C3%ADa,+Abando,+48001+Bilbao/data=!4m2!3m1!1s0xd4e4fd091ba0b45:0x80aecf60675a5b59!18m1!1e1"
+	// Both pages verified against live responses (July 2026).
+	defaultPage := `<html><head>
+<meta content="Google Maps" property="og:title">
+<meta content="https://maps.google.com/maps/api/staticmap?center=37.0625%2C-95.677068&amp;zoom=4" property="og:image">
+</head><body></body></html>`
+	embedPage := `<html><body><script>initEmbed([null,[[[2905.5,-2.9291572,43.2615854],[0,0,0]],null,null,[["0xd4e4fd091ba0b45:0x80aecf60675a5b59","El Corte Inglés Gran Vía, 48001 Bilbao, Biscay, Spain",[43.2615854,-2.9291572],"9272576695760214873"],"El Corte Inglés Gran Vía"]]])</script></body></html>`
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		switch {
+		case req.URL.Hostname() == "maps.app.goo.gl":
+			return redirectTo(req, long), nil
+		case req.URL.Query().Get("output") == "embed":
+			// The cid is the second half of the feature id, in decimal.
+			if cid := req.URL.Query().Get("cid"); cid != "9272576695760214873" {
+				t.Errorf("embed cid = %q, want 9272576695760214873", cid)
+			}
+			return pageWith(req, embedPage), nil
+		case req.URL.Hostname() == "www.google.com":
+			return pageWith(req, defaultPage), nil
+		default:
+			t.Errorf("unexpected outbound host %q", req.URL.Hostname())
+			return okPage(req), nil
+		}
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/jw51CPRjdASK3tCL7"), "", "")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d: %s", res.StatusCode, readBody(t, res))
+	}
+	var got struct {
+		Name string  `json:"name"`
+		Lat  float64 `json:"lat"`
+		Lng  float64 `json:"lng"`
+	}
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Lat != 43.2615854 || got.Lng != -2.9291572 {
+		t.Errorf("coords = %v,%v, want 43.2615854,-2.9291572", got.Lat, got.Lng)
+	}
+	if got.Name != "El Corte Inglés Gran Vía" {
+		t.Errorf("name = %q, want %q", got.Name, "El Corte Inglés Gran Vía")
+	}
+}
+
+func TestExpandOmitsCoordsWhenOnlyDefaultCenterAndNoFeatureID(t *testing.T) {
+	srv := newTestServer(t)
+	// Default-centred page and no feature id to fall back on: the response
+	// must omit lat/lng entirely, never return the middle of the USA.
+	long := "https://www.google.com/maps/place/Gure+Toki"
+	page := `<html><head>
+<meta content="https://maps.google.com/maps/api/staticmap?center=37.0625%2C-95.677068&amp;zoom=4" property="og:image">
+</head><body></body></html>`
+	stubExpandTransport(t, func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() == "maps.app.goo.gl" {
+			return redirectTo(req, long), nil
+		}
+		return pageWith(req, page), nil
+	})
+	res := do(t, http.MethodGet, srv.URL+"/expand?url="+neturl.QueryEscape("https://maps.app.goo.gl/abc"), "", "")
+	var got map[string]any
+	if err := json.Unmarshal([]byte(readBody(t, res)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := got["lat"]; ok {
+		t.Errorf("response includes lat=%v — the default centre must be rejected", got["lat"])
+	}
+}
+
 func TestExpandNameFallsBackToOgTitleWithoutPlacePath(t *testing.T) {
 	srv := newTestServer(t)
 	// A /@lat,lng URL shape carries no /place/ segment, so the name must come
