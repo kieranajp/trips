@@ -155,8 +155,7 @@ main { flex: 1; min-height: 0; position: relative; }
 .pop-links { display: flex; gap: 12px; font-size: 11px; font-weight: 600; }
 .pop-links a, .pop-links button { color: #2c8f96; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid currentColor; }
 .pop-links .del { color: #a3341f; }
-.pin { transform: translate(-50%, -100%); }
-.pin svg { filter: drop-shadow(0 2px 3px rgba(28, 35, 33, .35)); }
+.pin svg { filter: drop-shadow(0 2px 3px rgba(28, 35, 33, .35)); display: block; }
 .home svg { filter: drop-shadow(0 2px 4px rgba(28, 35, 33, .45)); }
 .leaflet-tooltip.nb-label { background: transparent; border: 0; box-shadow: none; color: var(--ink); font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 11px; letter-spacing: .03em; text-shadow: 0 1px 3px rgba(243, 239, 230, .95), 0 0 3px rgba(243, 239, 230, .95); white-space: nowrap; }
 .leaflet-tooltip.nb-label::before { display: none; }
