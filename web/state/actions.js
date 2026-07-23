@@ -2,6 +2,7 @@ import { cats, editingLog, flights, only, pins, stays, toastMsg, trip, onMap } f
 import { save } from "./persistence.js";
 import { freshState } from "./trips.js";
 import { uid } from "../lib/uid.js";
+import { todayLocal } from "../lib/dates.js";
 
 let toastTimer;
 
@@ -58,6 +59,19 @@ export function toggleCatalog(item) {
     src: item.cid,
   });
   toast(item.name + " added to the map");
+}
+
+// Check a pin off as visited (recording the day — defaults to today), or
+// un-check it. `visitedAt: null` rather than deleting the key: savePin merges
+// patches, so null is how a patch expresses "cleared".
+export function toggleVisited(pin, date) {
+  if (pin.visitedAt) {
+    savePin({ visitedAt: null }, pin);
+    toast(`${pin.name} unmarked`);
+  } else {
+    savePin({ visitedAt: date || todayLocal() }, pin);
+    toast(`${pin.name} checked off ✓`);
+  }
 }
 
 export function editLog(kind, item) {

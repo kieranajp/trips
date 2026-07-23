@@ -5,6 +5,7 @@
 import { catById } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { escapeHtml } from "../../lib/html.js";
+import { fmtDay } from "../../lib/dates.js";
 
 // A place's `url` can be any string (pasted link, imported file), so only
 // http(s) is honoured; anything else (javascript:, data:, …) falls back to a
@@ -17,10 +18,12 @@ export function pinPopupHtml(pin) {
   const category = catById(pin.cat);
   return `<div class="pop-tag" style="color:${escapeHtml(category.color)}">${escapeHtml(category.name)}</div>
     <div class="pop-nm">${escapeHtml(pin.name)}</div>
+    ${pin.visitedAt ? `<div class="pop-visited">✓ Visited ${escapeHtml(fmtDay(pin.visitedAt))}</div>` : ""}
     ${pin.note ? `<p class="pop-nt">${escapeHtml(pin.note)}</p>` : ""}
     <div class="pop-links">
       <a href="${escapeHtml(mapsUrl(pin))}" target="_blank" rel="noopener">Open in Maps ↗</a>
       <button data-share="${escapeHtml(pin.id)}">Share</button>
+      ${canEdit.value ? `<button data-visit="${escapeHtml(pin.id)}">${pin.visitedAt ? "Unvisit" : "Check off ✓"}</button>` : ""}
       ${canEdit.value ? `<button data-edit="${escapeHtml(pin.id)}">Edit</button>` : ""}
     </div>`;
 }

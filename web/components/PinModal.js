@@ -3,6 +3,7 @@ import { html } from "htm/preact";
 import { cats, editing } from "../state/signals.js";
 import { removePin, savePin, toast } from "../state/actions.js";
 import { COORDS_HINT, parseLatLng } from "../lib/maps.js";
+import { todayLocal } from "../lib/dates.js";
 
 function PinForm({ edit }) {
   const pin = edit.pin;
@@ -11,18 +12,23 @@ function PinForm({ edit }) {
   const [category, setCategory] = useState(pin?.cat || cats.value[0].id);
   const [note, setNote] = useState(pin?.note || "");
   const [coords, setCoords] = useState(location ? `${(+location.lat).toFixed(6)}, ${(+location.lng).toFixed(6)}` : "");
+  const [visited, setVisited] = useState(!!pin?.visitedAt);
+  const [visitedDate, setVisitedDate] = useState(pin?.visitedAt || todayLocal());
   useEffect(() => {
     setName(pin?.name || edit.name || "");
     setCategory(pin?.cat || cats.value[0].id);
     setNote(pin?.note || "");
     setCoords(location ? `${(+location.lat).toFixed(6)}, ${(+location.lng).toFixed(6)}` : "");
+    setVisited(!!pin?.visitedAt);
+    setVisitedDate(pin?.visitedAt || todayLocal());
   }, [edit]);
   const close = () => (editing.value = null);
   const submit = () => {
     if (!name.trim()) { toast("Give it a name"); return; }
     const parsed = parseLatLng(coords);
     if (!parsed) { toast(COORDS_HINT); return; }
-    const fields = { name: name.trim(), cat: category, note: note.trim(), lat: parsed.lat, lng: parsed.lng };
+    const fields = { name: name.trim(), cat: category, note: note.trim(), lat: parsed.lat, lng: parsed.lng,
+      visitedAt: visited ? (visitedDate || todayLocal()) : null };
     if (!pin && edit.url) fields.url = edit.url;
     savePin(fields, pin);
     close();
@@ -40,6 +46,13 @@ function PinForm({ edit }) {
         value=${note} onInput=${(event) => setNote(event.target.value)}></textarea></div>
       <div class="fld"><label>Coordinates</label><input type="text" placeholder="lat, lng"
         value=${coords} onInput=${(event) => setCoords(event.target.value)}/></div>
+      <div class="fld"><label>Visited</label>
+        <div class="visitrow">
+          <label class="check"><input type="checkbox" checked=${visited}
+            onChange=${(event) => setVisited(event.target.checked)}/> Been here</label>
+          ${visited ? html`<input type="date" value=${visitedDate}
+            onInput=${(event) => setVisitedDate(event.target.value)}/>` : null}
+        </div></div>
       <div class="modal-act">
         ${pin ? html`<button class="btn ghost del" style="color:#a3341f" onClick=${() => { removePin(pin.id); close(); }}>Delete</button>` : null}
         <span class="spacer"></span>

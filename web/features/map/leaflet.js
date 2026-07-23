@@ -1,5 +1,6 @@
 import { effect } from "@preact/signals";
 import { areasOn, catById, editing, pins, stays, trip, visiblePins } from "../../state/signals.js";
+import { toggleVisited } from "../../state/actions.js";
 import { escapeHtml } from "../../lib/html.js";
 import { homeIconSpec, pinIconSpec } from "./icons.js";
 import { neighbourhoodPopupHtml, pinPopupHtml, stayPopupHtml } from "./popups.js";
@@ -45,7 +46,7 @@ export function createTripMap(element, definition, L = window.L) {
     markerLayer.clearLayers();
     for (const id in markers) delete markers[id];
     visiblePins.value.forEach((pin) => {
-      const icon = L.divIcon(pinIconSpec(catById(pin.cat).color));
+      const icon = L.divIcon(pinIconSpec(catById(pin.cat).color, !!pin.visitedAt));
       const marker = L.marker([pin.lat, pin.lng], { icon }).addTo(markerLayer);
       marker.bindPopup(pinPopupHtml(pin));
       marker.on("popupopen", (event) => {
@@ -57,6 +58,11 @@ export function createTripMap(element, definition, L = window.L) {
         };
         const shareButton = content.querySelector("[data-share]");
         if (shareButton) shareButton.onclick = () => sharePin(pin);
+        const visitButton = content.querySelector("[data-visit]");
+        if (visitButton) visitButton.onclick = () => {
+          const current = pins.value.find((item) => item.id === pin.id);
+          if (current) toggleVisited(current);
+        };
       });
       markers[pin.id] = marker;
     });

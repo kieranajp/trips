@@ -71,6 +71,11 @@ main { flex: 1; min-height: 0; position: relative; }
 .pi .picat { flex: none; align-self: center; font-family: inherit; font-size: 10.5px; padding: 2px 4px; max-width: 104px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); color: var(--muted); cursor: pointer; }
 .pi .x { align-self: center; color: var(--muted); font-size: 15px; line-height: 1; padding: 0 3px; cursor: pointer; visibility: hidden; }
 .pi:hover .x { visibility: visible; }
+.pi .visit { flex: none; align-self: center; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); color: transparent; font-size: 11px; line-height: 1; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.pi .visit:hover { border-color: #35784b; color: #35784b; }
+.pi .visit.on { background: #35784b; border-color: #35784b; color: var(--paper); }
+.pi .visit.static { cursor: default; }
+.pi.visited .nm { color: var(--muted); }
 .empty { padding: 20px 15px; color: var(--muted); font-size: 12px; line-height: 1.5; }
 
 #view-ideas { overflow: auto; display: none; padding: 0; }
@@ -130,6 +135,10 @@ main { flex: 1; min-height: 0; position: relative; }
 .fld label { display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
 .fld input, .fld textarea, .fld select { width: 100%; font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 2px; background: #fff; color: var(--ink); }
 .fld textarea { resize: vertical; min-height: 56px; }
+.visitrow { display: flex; align-items: center; gap: 12px; }
+.visitrow .check { display: flex; align-items: center; gap: 7px; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink); margin: 0; white-space: nowrap; }
+.visitrow .check input[type=checkbox] { width: auto; accent-color: #35784b; }
+.visitrow input[type=date] { flex: 1; width: auto; }
 .modal-act { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
 .modal-act .spacer { flex: 1; }
 
@@ -152,7 +161,8 @@ main { flex: 1; min-height: 0; position: relative; }
 .pop-tag { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
 .pop-nm { font-family: "Fraunces", serif; font-size: 16px; font-weight: 500; line-height: 1.05; margin-bottom: 4px; }
 .pop-nt { font-size: 11.5px; line-height: 1.38; color: rgba(28, 35, 33, .74); margin: 0 0 8px; }
-.pop-links { display: flex; gap: 12px; font-size: 11px; font-weight: 600; }
+.pop-visited { font-size: 10.5px; font-weight: 600; color: #35784b; margin: -2px 0 6px; }
+.pop-links { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; font-weight: 600; }
 .pop-links a, .pop-links button { color: #2c8f96; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid currentColor; }
 .pop-links .del { color: #a3341f; }
 .pin svg { filter: drop-shadow(0 2px 3px rgba(28, 35, 33, .35)); display: block; }

@@ -6,8 +6,9 @@ const stubs = installBrowserStubs();
 
 const { cats, flights, only, pins, stays, toastMsg, trip } = await import("../../web/state/signals.js");
 const {
-  deleteCat, removePin, reset, savePin, saveStay, toggleCatalog, toggleOnly,
+  deleteCat, removePin, reset, savePin, saveStay, toggleCatalog, toggleOnly, toggleVisited,
 } = await import("../../web/state/actions.js");
+const { todayLocal } = await import("../../web/lib/dates.js");
 
 const catalogItem = { cid: "gure", name: "Gure Toki", lat: 43.2593, lng: -2.9222, cat: "pintxos", note: "n", url: "u" };
 
@@ -103,6 +104,24 @@ test("saveStay adds with an st_ id and patches on update", () => {
   assert.equal(stays.value.length, 1);
   assert.equal(stays.value[0].name, "Hotel renamed");
   assert.equal(stays.value[0].lat, 43.26);
+});
+
+test("toggleVisited checks a pin off with today's date and persists it", () => {
+  pins.value = [{ id: "p_a", name: "Gure Toki", cat: "pintxos" }];
+  toggleVisited(pins.value[0]);
+  assert.equal(pins.value[0].visitedAt, todayLocal());
+  assert.match(toastMsg.value, /checked off/);
+  const saved = JSON.parse(stubs.store.get("trip_state_testtrip"));
+  assert.equal(saved.pins[0].visitedAt, todayLocal());
+});
+
+test("toggleVisited accepts an explicit date and clears on the second toggle", () => {
+  pins.value = [{ id: "p_a", name: "Gure Toki", cat: "pintxos" }];
+  toggleVisited(pins.value[0], "2026-07-20");
+  assert.equal(pins.value[0].visitedAt, "2026-07-20");
+  toggleVisited(pins.value[0]);
+  assert.equal(pins.value[0].visitedAt, null);
+  assert.match(toastMsg.value, /unmarked/);
 });
 
 test("toggleOnly toggles the single-category filter", () => {
