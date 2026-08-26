@@ -41,5 +41,8 @@ jobs:
           helm upgrade --install trips ./charts/trips \
             --namespace apps \
             --set app.image.tag="$IMAGE_TAG" \
+            --set app.cartoApiKey="$CARTO_API_KEY" \
             --wait \
             --timeout 10m
+        env:
+          CARTO_API_KEY: ${{ secrets.CARTO_API_KEY }}

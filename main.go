@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"html"
+	"html/template"
 	"io"
 	"io/fs"
 	"log"
@@ -26,8 +27,9 @@ import (
 // dev (godotenv.Load never overrides vars that are already set, so real env
 // wins over the file).
 type config struct {
-	DBPath string `envconfig:"DB_PATH" default:"/data/trip.db"`
-	Port   string `envconfig:"PORT" default:"8080"`
+	DBPath      string `envconfig:"DB_PATH" default:"/data/trip.db"`
+	Port        string `envconfig:"PORT" default:"8080"`
+	CartoAPIKey string `envconfig:"CARTO_API_KEY"` // optional; required by Carto Voyager tiles
 }
 
 //go:embed all:web
@@ -59,21 +61,32 @@ func openDB(path string) (*sql.DB, error) {
 
 // newMux wires every route. Split from main so tests can hit the handlers
 // through httptest without starting the real server.
-func newMux(web fs.FS) *http.ServeMux {
+func newMux(web fs.FS, cfg config) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
-
-	// /whoami and /login only ever reach the app through the auth-private
-	// ingress route, so a request arriving here has already cleared Authentik
-	// forward-auth. The identity comes from the X-authentik-* headers the
-	// outpost injects; reads (public routes) never hit these handlers.
 	mux.HandleFunc("/whoami", whoamiHandler)
 	mux.HandleFunc("/login", loginHandler)
 	mux.HandleFunc("/state", stateHandler)
 	mux.HandleFunc("/files", filesHandler)
 	mux.HandleFunc("/expand", expandHandler)
-	mux.Handle("/", http.FileServer(http.FS(web)))
+	mux.HandleFunc("/", indexHandler(web, cfg.CartoAPIKey))
 	return mux
+}
+
+// indexHandler serves the embedded static files, but renders index.html from
+// a template so the frontend can pick up config that must live server-side
+// (for now, the Carto basemap API key).
+func indexHandler(web fs.FS, cartoKey string) http.HandlerFunc {
+	indexTpl := template.Must(template.New("index.html").ParseFS(web, "index.html"))
+	fileServer := http.FileServer(http.FS(web))
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" && r.URL.Path != "/index.html" {
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_ = indexTpl.Execute(w, map[string]string{"CartoAPIKey": cartoKey})
+	}
 }
 
 // whoamiHandler lets the SPA discover its login state. The ingress routes this
@@ -492,5 +505,6 @@ func main() {
 
 	addr := ":" + cfg.Port
 	log.Println("trips listening on", addr)
-	log.Fatal(http.ListenAndServe(addr, newMux(web)))
+	log.Fatal(http.ListenAndServe(addr, newMux(web, cfg)))
 }
+

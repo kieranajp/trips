@@ -48,6 +48,11 @@ spec:
         env:
         - name: DB_PATH
           value: /data/trip.db
+        - name: CARTO_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-carto
+              key: CARTO_API_KEY
         volumeMounts:
         - name: data
           mountPath: /data

@@ -17,7 +17,11 @@ const hasCoords = (place) => place
 // disposed on destroy(), and L injectable so tests can drive it with a fake.
 export function createTripMap(element, definition, L = window.L) {
   const map = L.map(element, { zoomControl: true });
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+  const env = typeof window !== "undefined" ? window.ENV : null;
+  const tileUrl = env?.cartoApiKey
+    ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(env.cartoApiKey)}`
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+  L.tileLayer(tileUrl, {
     maxZoom: 19,
     subdomains: "abcd",
     attribution: "&copy; OpenStreetMap, &copy; CARTO",

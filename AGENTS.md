@@ -42,7 +42,11 @@ Preact + htm + `@preact/signals` via `<script type="importmap">` from esm.sh:
 
 ## Secrets are gitignored — the repo is PUBLIC
 
-`.env` (Google Places key), `Takeout/`, `*.csv`, `bilbao-import.json` are gitignored. **Never commit them.** Before `git add -A`: `git ls-files --cached | grep -iE '\.env|Takeout|\.csv|import\.json'` must be empty.
+`.env` (Google Places + CARTO API keys), `Takeout/`, `*.csv`, `bilbao-import.json` are gitignored. **Never commit them.** Before `git add -A`: `git ls-files --cached | grep -iE '\.env|Takeout|\.csv|import\.json'` must be empty.
+
+### CARTO_API_KEY
+
+Carto's Voyager tiles now require an API key: `CARTO_API_KEY=<key>` in `.env` (or a real env var) is injected into `index.html` as `window.ENV.cartoApiKey`. The frontend appends it to tile requests as `?key=...`. Empty/missing key leaves the URL unchanged, so it still works for Carto's policy-transition window but will likely break later.
 
 ## cmd/import & cmd/seedurls are one-off local tools
 
