@@ -1,0 +1,220 @@
+{
+  "id": "oviedo",
+  "title": "Oviedo",
+  "subtitle": "day trip",
+  "blurb": "A day in Asturias' capital — cider bars, pre-Romanesque corners and old-town pinchos.",
+  "center": [
+    43.36,
+    -5.845
+  ],
+  "zoom": 14,
+  "geocodeHint": "Oviedo, Spain",
+  "geocodeCenter": [
+    43.36,
+    -5.845
+  ],
+  "flights": [],
+  "stays": [],
+  "categories": [
+    {
+      "id": "coffee",
+      "name": "Coffee",
+      "color": "#6f4e37"
+    },
+    {
+      "id": "pintxos",
+      "name": "Pintxos & tapas",
+      "color": "#d9822b"
+    },
+    {
+      "id": "dinner",
+      "name": "Dinner",
+      "color": "#5f7d4a"
+    },
+    {
+      "id": "wine",
+      "name": "Wine",
+      "color": "#8c2f4a"
+    },
+    {
+      "id": "beer",
+      "name": "Beer",
+      "color": "#caa03a"
+    },
+    {
+      "id": "cocktails",
+      "name": "Cocktails",
+      "color": "#a34a76"
+    },
+    {
+      "id": "saved",
+      "name": "Saved",
+      "color": "#5b6672"
+    }
+  ],
+  "seedOnMap": [
+    "oviedo_001",
+    "oviedo_002",
+    "oviedo_003",
+    "oviedo_004",
+    "oviedo_005",
+    "oviedo_006",
+    "oviedo_007",
+    "oviedo_008",
+    "oviedo_009",
+    "oviedo_010",
+    "oviedo_011",
+    "oviedo_012",
+    "oviedo_013",
+    "oviedo_014",
+    "oviedo_015",
+    "oviedo_017"
+  ],
+  "catalog": [
+    {
+      "cid": "oviedo_001",
+      "cat": "cocktails",
+      "name": "Mala Saña",
+      "lat": 43.362888,
+      "lng": -5.84557,
+      "note": "In Top 3 Cocktail Bars in Asturias",
+      "url": "https://www.google.com/maps/place/Mala+Sa%C3%B1a/data=!4m2!3m1!1s0xd368ceffa03d61b:0x796574b5f2c67571"
+    },
+    {
+      "cid": "oviedo_002",
+      "cat": "beer",
+      "name": "Bodegón El Manantial 1928",
+      "lat": 43.367115,
+      "lng": -5.852147,
+      "note": "Wine/beer and some tapas",
+      "url": "https://www.google.com/maps/place/Bodeg%C3%B3n+El+Manantial+1928/data=!4m2!3m1!1s0xd368d0046c443c9:0x27dd69eb6d6d6671"
+    },
+    {
+      "cid": "oviedo_003",
+      "cat": "wine",
+      "name": "Bar-Tienda Albar",
+      "lat": 43.364112,
+      "lng": -5.843995,
+      "note": "Small wine shop/bar with some tapas",
+      "url": "https://www.google.com/maps/place/Bar-Tienda+Albar/data=!4m2!3m1!1s0xd368cf025863f79:0xd442a0c55348b62e"
+    },
+    {
+      "cid": "oviedo_004",
+      "cat": "pintxos",
+      "name": "Jamōn Jamōn",
+      "lat": 43.362041,
+      "lng": -5.845841,
+      "note": "Wines and tapas",
+      "url": "https://www.google.com/maps/place/Jam%C5%8Dn+Jam%C5%8Dn/data=!4m2!3m1!1s0xd368cef8a3e0a03:0xa942838bea8e6564"
+    },
+    {
+      "cid": "oviedo_005",
+      "cat": "dinner",
+      "name": "Uria Grill Kebab",
+      "lat": 43.362716,
+      "lng": -5.849085,
+      "note": "Kebab place with hummus",
+      "url": "https://www.google.com/maps/place/Uria+Grill+Kebab/data=!4m2!3m1!1s0xd368d000e02b3d7:0x6687abdcce5d6cd7"
+    },
+    {
+      "cid": "oviedo_006",
+      "cat": "dinner",
+      "name": "Ramen Shifu",
+      "lat": 43.360478,
+      "lng": -5.847298,
+      "note": "Ramen and bao buns",
+      "url": "https://www.google.com/maps/place/Ramen+Shifu/data=!4m2!3m1!1s0xd368d60030fd331:0xab53516236385f55"
+    },
+    {
+      "cid": "oviedo_007",
+      "cat": "saved",
+      "name": "Supermercado El Corte Inglés",
+      "lat": 43.364401,
+      "lng": -5.85222,
+      "note": "",
+      "url": "https://www.google.com/maps/place/Supermercado+El+Corte+Ingl%C3%A9s/data=!4m2!3m1!1s0xd368df5e81475e3:0x99a288c91bc95bdf"
+    },
+    {
+      "cid": "oviedo_008",
+      "cat": "dinner",
+      "name": "El 22- TAQUERÍA MEXICANA 🇲🇽",
+      "lat": 43.363449,
+      "lng": -5.840947,
+      "note": "Tacos. Not the cheapest place though",
+      "url": "https://www.google.com/maps/place/El+22-+TAQUER%C3%8DA+MEXICANA+%F0%9F%87%B2%F0%9F%87%BD/data=!4m2!3m1!1s0xd368b9da777656d:0xb4fff005ddeabb3"
+    },
+    {
+      "cid": "oviedo_009",
+      "cat": "wine",
+      "name": "Ruta de los vinos (Oviedo)",
+      "lat": 43.366441,
+      "lng": -5.852168,
+      "note": "Street with many wine bars",
+      "url": "https://www.google.com/maps/place/Ruta+de+los+vinos+(Oviedo)/data=!4m2!3m1!1s0xd368cfc6faabac3:0x2db9dd5c8a016c34"
+    },
+    {
+      "cid": "oviedo_010",
+      "cat": "wine",
+      "name": "Coalla Oviedo",
+      "lat": 43.362585,
+      "lng": -5.854305,
+      "note": "Wine / gourmet store",
+      "url": "https://www.google.com/maps/place/Coalla+Oviedo/data=!4m2!3m1!1s0xd368cef6591d80f:0x8c1c9d0df1e3c69f"
+    },
+    {
+      "cid": "oviedo_011",
+      "cat": "pintxos",
+      "name": "Pinchito Bar",
+      "lat": 43.359387,
+      "lng": -5.843116,
+      "note": "Vermouth and pinchos",
+      "url": "https://www.google.com/maps/place/Pinchito+Bar/data=!4m2!3m1!1s0xd368dc871988785:0xe2ba06350f423a29"
+    },
+    {
+      "cid": "oviedo_012",
+      "cat": "dinner",
+      "name": "La Raposa",
+      "lat": 43.35991,
+      "lng": -5.84389,
+      "note": "Vegan burgers and croquettes",
+      "url": "https://www.google.com/maps/place/La+Raposa/data=!4m2!3m1!1s0xd368dc61995a8f1:0xf3edd7f953a95042"
+    },
+    {
+      "cid": "oviedo_013",
+      "cat": "beer",
+      "name": "Cervecería El Claustro",
+      "lat": 43.36009,
+      "lng": -5.843941,
+      "note": "Beer",
+      "url": "https://www.google.com/maps/place/Cervecer%C3%ADa+El+Claustro/data=!4m2!3m1!1s0xd368d000dbc2a95:0xf55a9bb4fc808427"
+    },
+    {
+      "cid": "oviedo_014",
+      "cat": "cocktails",
+      "name": "No son horas Atelier cocktails",
+      "lat": 43.361728,
+      "lng": -5.842453,
+      "note": "Cocktails",
+      "url": "https://www.google.com/maps/place/No+son+horas+Atelier+cocktails/data=!4m2!3m1!1s0xd368d25f43af3d5:0xbede5f6c0015e846"
+    },
+    {
+      "cid": "oviedo_015",
+      "cat": "coffee",
+      "name": "Pionero Coffee Roasters",
+      "lat": 43.364738,
+      "lng": -5.853926,
+      "note": "Coffee and toast",
+      "url": "https://www.google.com/maps/place/Pionero+Coffee+Roasters/data=!4m2!3m1!1s0xd368dd71492086b:0xbe9dc822061bd04c"
+    },
+    {
+      "cid": "oviedo_017",
+      "cat": "dinner",
+      "name": "Bangkok 14",
+      "lat": 43.363543,
+      "lng": -5.855298,
+      "note": "",
+      "url": "https://www.google.com/maps/place/Bangkok+14/data=!4m2!3m1!1s0xd368dd045950367:0xe10983af703fc938"
+    }
+  ],
+  "neighbourhoods": []
+}

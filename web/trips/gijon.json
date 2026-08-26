@@ -1,0 +1,550 @@
+{
+  "id": "gijon",
+  "title": "Gijón",
+  "subtitle": "trip map",
+  "blurb": "Asturian coast — cider, coffee and pinchos between the marina and San Lorenzo.",
+  "center": [
+    43.532,
+    -5.661
+  ],
+  "zoom": 14,
+  "geocodeHint": "Gijón, Spain",
+  "geocodeCenter": [
+    43.532,
+    -5.661
+  ],
+  "flights": [],
+  "stays": [],
+  "categories": [
+    {
+      "id": "coffee",
+      "name": "Coffee",
+      "color": "#6f4e37"
+    },
+    {
+      "id": "dinner",
+      "name": "Dinner",
+      "color": "#5f7d4a"
+    },
+    {
+      "id": "wine",
+      "name": "Wine",
+      "color": "#8c2f4a"
+    },
+    {
+      "id": "beer",
+      "name": "Beer",
+      "color": "#caa03a"
+    },
+    {
+      "id": "cocktails",
+      "name": "Cocktails",
+      "color": "#a34a76"
+    }
+  ],
+  "seedOnMap": [
+    "gijon_001",
+    "gijon_002",
+    "gijon_003",
+    "gijon_004",
+    "gijon_005",
+    "gijon_006",
+    "gijon_007",
+    "gijon_008",
+    "gijon_009",
+    "gijon_010",
+    "gijon_011",
+    "gijon_012",
+    "gijon_013",
+    "gijon_014",
+    "gijon_015",
+    "gijon_016",
+    "gijon_017",
+    "gijon_019",
+    "gijon_020",
+    "gijon_021",
+    "gijon_022",
+    "gijon_023",
+    "gijon_024",
+    "gijon_025",
+    "gijon_026",
+    "gijon_027",
+    "gijon_028",
+    "gijon_029",
+    "gijon_030",
+    "gijon_031",
+    "gijon_032",
+    "gijon_033",
+    "gijon_034",
+    "gijon_035",
+    "gijon_036",
+    "gijon_037",
+    "gijon_038",
+    "gijon_039",
+    "gijon_040",
+    "gijon_041",
+    "gijon_042",
+    "gijon_043",
+    "gijon_044",
+    "gijon_045",
+    "gijon_046",
+    "gijon_047",
+    "gijon_048",
+    "gijon_049",
+    "gijon_050",
+    "gijon_051"
+  ],
+  "catalog": [
+    {
+      "cid": "gijon_001",
+      "cat": "coffee",
+      "name": "môma coffee",
+      "lat": 43.537552,
+      "lng": -5.650576,
+      "note": "Coffee, beer, sandwiches",
+      "url": "https://www.google.com/maps/place/m%C3%B4ma+coffee/data=!4m2!3m1!1s0xd367d5900413e5f:0x367052eca5c841b"
+    },
+    {
+      "cid": "gijon_002",
+      "cat": "wine",
+      "name": "La Pequeña Vermutería",
+      "lat": 43.546168,
+      "lng": -5.662374,
+      "note": "Vermouth, sandwiches, tapas",
+      "url": "https://www.google.com/maps/place/La+Peque%C3%B1a+Vermuter%C3%ADa/data=!4m2!3m1!1s0xd367c66365c85ff:0xd866bf187d903f0a"
+    },
+    {
+      "cid": "gijon_003",
+      "cat": "wine",
+      "name": "BAR COS",
+      "lat": 43.542995,
+      "lng": -5.664817,
+      "note": "Wine and cheese",
+      "url": "https://www.google.com/maps/place/BAR+COS/data=!4m2!3m1!1s0xd367d0281b7ea6b:0xd766695dc4b62a67"
+    },
+    {
+      "cid": "gijon_004",
+      "cat": "wine",
+      "name": "El Rincón de Chema",
+      "lat": 43.542791,
+      "lng": -5.664932,
+      "note": "Wine and vermouth",
+      "url": "https://www.google.com/maps/place/El+Rinc%C3%B3n+de+Chema/data=!4m2!3m1!1s0xd367dee93599a8d:0x7230ed740ae81913"
+    },
+    {
+      "cid": "gijon_005",
+      "cat": "wine",
+      "name": "Epoca Vinateria Vermuteria",
+      "lat": 43.541592,
+      "lng": -5.666661,
+      "note": "Vermouth",
+      "url": "https://www.google.com/maps/place/Epoca+Vinateria+Vermuteria/data=!4m2!3m1!1s0xd367d1d25380f47:0x3e51975ed4476da7"
+    },
+    {
+      "cid": "gijon_006",
+      "cat": "beer",
+      "name": "El Andén",
+      "lat": 43.540716,
+      "lng": -5.658129,
+      "note": "Beer/wine and you can choose your free tapa",
+      "url": "https://www.google.com/maps/place/El+And%C3%A9n/data=!4m2!3m1!1s0xd367c63636cdb77:0xb4dcfaaa12fd59a3"
+    },
+    {
+      "cid": "gijon_007",
+      "cat": "beer",
+      "name": "Cervezas Limbo",
+      "lat": 43.540945,
+      "lng": -5.656551,
+      "note": "Craft beer and Hofbräuhaus on tap",
+      "url": "https://www.google.com/maps/place/Cervezas+Limbo/data=!4m2!3m1!1s0xd367d9e8d61bb4f:0x9fca12d81e43d38f"
+    },
+    {
+      "cid": "gijon_008",
+      "cat": "cocktails",
+      "name": "Duall. Specialty Coffee & Cocktail Bar",
+      "lat": 43.54055,
+      "lng": -5.654055,
+      "note": "Coffee, breakfast, cocktails",
+      "url": "https://www.google.com/maps/place/Duall.+Specialty+Coffee+%26+Cocktail+Bar/data=!4m2!3m1!1s0xd367dc9a0299043:0xf90d6d40d25990df"
+    },
+    {
+      "cid": "gijon_009",
+      "cat": "beer",
+      "name": "Cervecería Betanzos",
+      "lat": 43.538536,
+      "lng": -5.653257,
+      "note": "Beers. Spaten and staropramen on tap",
+      "url": "https://www.google.com/maps/place/Cervecer%C3%ADa+Betanzos/data=!4m2!3m1!1s0xd367c7dac43c1bb:0xdcaa8dd946bffa3e"
+    },
+    {
+      "cid": "gijon_010",
+      "cat": "beer",
+      "name": "Cervecería Vincer",
+      "lat": 43.53865,
+      "lng": -5.653433,
+      "note": "Beers. Späten on tap",
+      "url": "https://www.google.com/maps/place/Cervecer%C3%ADa+Vincer/data=!4m2!3m1!1s0xd367c7dab775477:0x69d5b4d4566c2eb4"
+    },
+    {
+      "cid": "gijon_011",
+      "cat": "coffee",
+      "name": "Civeta Coffee",
+      "lat": 43.538992,
+      "lng": -5.658674,
+      "note": "Coffee, breakfast, wraps, beer, wine",
+      "url": "https://www.google.com/maps/place/Civeta+Coffee/data=!4m2!3m1!1s0xd367d71b6283bed:0x19f810bac9505b1d"
+    },
+    {
+      "cid": "gijon_012",
+      "cat": "wine",
+      "name": "Coalla Uría",
+      "lat": 43.539179,
+      "lng": -5.656986,
+      "note": "Gourmet grocery shop. No bar to sit here like the other Coalla branches though :(",
+      "url": "https://www.google.com/maps/place/Coalla+Ur%C3%ADa/data=!4m2!3m1!1s0xd367c633b055aed:0xb490f1a9402d2b52"
+    },
+    {
+      "cid": "gijon_013",
+      "cat": "wine",
+      "name": "Mitequiero Gourmet - Tienda de productos Gourmet - Cestas Regalos",
+      "lat": 43.537656,
+      "lng": -5.656477,
+      "note": "Bottle shop. No tastings.",
+      "url": "https://www.google.com/maps/place/Mitequiero+Gourmet+-+Tienda+de+productos+Gourmet+-+Cestas+Regalos/data=!4m2!3m1!1s0xd367d519b0b346d:0x957d0658b9ed1801"
+    },
+    {
+      "cid": "gijon_014",
+      "cat": "beer",
+      "name": "Las Rías bajas",
+      "lat": 43.530841,
+      "lng": -5.660544,
+      "note": "Wine, cheese and tapas. Gets busy though.",
+      "url": "https://www.google.com/maps/place/Las+R%C3%ADas+bajas/data=!4m2!3m1!1s0xd367c8ebd0d324b:0xf82e2b7c872865bf"
+    },
+    {
+      "cid": "gijon_015",
+      "cat": "wine",
+      "name": "La Sartén",
+      "lat": 43.53784,
+      "lng": -5.657164,
+      "note": "Beer and a tapa for €2.50. Spicy vermouth",
+      "url": "https://www.google.com/maps/place/La+Sart%C3%A9n/data=!4m2!3m1!1s0xd367c62c43137e9:0xd4f32dfc984d9d09"
+    },
+    {
+      "cid": "gijon_016",
+      "cat": "coffee",
+      "name": "El Jardín",
+      "lat": 43.535042,
+      "lng": -5.658716,
+      "note": "Bar/cafe with pinchos. Tortilla is good. Near flat.",
+      "url": "https://www.google.com/maps/place/El+Jard%C3%ADn/data=!4m2!3m1!1s0xd367dabfe16faff:0x2102d1faeb002965"
+    },
+    {
+      "cid": "gijon_017",
+      "cat": "beer",
+      "name": "Bar coffee Páramo",
+      "lat": 43.535348,
+      "lng": -5.658112,
+      "note": "Good selection of beers and vermouth. Near flat.",
+      "url": "https://www.google.com/maps/place/Bar+coffee+P%C3%A1ramo/data=!4m2!3m1!1s0xd367c883bb484a7:0x63d219c0826315a9"
+    },
+    {
+      "cid": "gijon_019",
+      "cat": "coffee",
+      "name": "LLENIN COFFEE",
+      "lat": 43.536571,
+      "lng": -5.656127,
+      "note": "Coffee and breakfast close to flat",
+      "url": "https://www.google.com/maps/place/LLENIN+COFFEE/data=!4m2!3m1!1s0xd367d4ebd0453b1:0xe5f0fa23f21cc999"
+    },
+    {
+      "cid": "gijon_020",
+      "cat": "coffee",
+      "name": "SAL COFFEE / SPECIALTY COFFEE GIJÓN",
+      "lat": 43.539777,
+      "lng": -5.64997,
+      "note": "Coffee and toasts",
+      "url": "https://www.google.com/maps/place/SAL+COFFEE+%2F+SPECIALTY+COFFEE+GIJ%C3%93N/data=!4m2!3m1!1s0xd367d24289566f1:0xdd8f2ade82a2c609"
+    },
+    {
+      "cid": "gijon_021",
+      "cat": "coffee",
+      "name": "Catlove Coffee",
+      "lat": 43.540159,
+      "lng": -5.66141,
+      "note": "Coffee and bagels",
+      "url": "https://www.google.com/maps/place/Catlove+Coffee/data=!4m2!3m1!1s0xd367da86a96de2f:0x5a9ca12cb239c816"
+    },
+    {
+      "cid": "gijon_022",
+      "cat": "coffee",
+      "name": "Whatever Coffee & Bocados",
+      "lat": 43.544395,
+      "lng": -5.663843,
+      "note": "Coffee, toast, sandwiches",
+      "url": "https://www.google.com/maps/place/Whatever+Coffee+%26+Bocados/data=!4m2!3m1!1s0xd367da225d85539:0xc96a45732ee1b27c"
+    },
+    {
+      "cid": "gijon_023",
+      "cat": "coffee",
+      "name": "Dulce Néctar Café",
+      "lat": 43.53828,
+      "lng": -5.64629,
+      "note": "coffee, brunch, toast",
+      "url": "https://www.google.com/maps/place/Dulce+N%C3%A9ctar+Caf%C3%A9/data=!4m2!3m1!1s0xd367d002ab9b891:0x256469b831a6060b"
+    },
+    {
+      "cid": "gijon_024",
+      "cat": "coffee",
+      "name": "Under Wonder Cafe",
+      "lat": 43.540534,
+      "lng": -5.671535,
+      "note": "coffee, brunch, toast",
+      "url": "https://www.google.com/maps/place/Under+Wonder+Cafe/data=!4m2!3m1!1s0xd367d2899be873b:0x85d59c5774cecfa1"
+    },
+    {
+      "cid": "gijon_025",
+      "cat": "coffee",
+      "name": "Primero Café",
+      "lat": 43.537968,
+      "lng": -5.658293,
+      "note": "Coffee, tortilla, toast",
+      "url": "https://www.google.com/maps/place/Primero+Caf%C3%A9/data=!4m2!3m1!1s0xd367c62fa5893ab:0xbc21e1009caa704"
+    },
+    {
+      "cid": "gijon_026",
+      "cat": "coffee",
+      "name": "SHANTI COFFEE / SPECIALTY COFFEE GIJÓN",
+      "lat": 43.536427,
+      "lng": -5.649411,
+      "note": "Coffee, toast, focaccia",
+      "url": "https://www.google.com/maps/place/SHANTI+COFFEE+%2F+SPECIALTY+COFFEE+GIJ%C3%93N/data=!4m2!3m1!1s0xd367da118afd3d9:0x6d3e3c1f7a8e011d"
+    },
+    {
+      "cid": "gijon_027",
+      "cat": "dinner",
+      "name": "La Tierra",
+      "lat": 43.539854,
+      "lng": -5.658614,
+      "note": "Shawarma, hummus. Run by a Spanish-Palestinian couple.",
+      "url": "https://www.google.com/maps/place/La+Tierra/data=!4m2!3m1!1s0xd367d90389d68d5:0x24c4a80f6bbd2dc7"
+    },
+    {
+      "cid": "gijon_028",
+      "cat": "coffee",
+      "name": "OKAERI Té & Comida Sabrosa",
+      "lat": 43.54077,
+      "lng": -5.659461,
+      "note": "Small breakfast place. Tea and Shakshuka.",
+      "url": "https://www.google.com/maps/place/OKAERI+T%C3%A9+%26+Comida+Sabrosa/data=!4m2!3m1!1s0xd367c6387a58c79:0x20fcfbaa52dd337f"
+    },
+    {
+      "cid": "gijon_029",
+      "cat": "dinner",
+      "name": "Piccola Sapori",
+      "lat": 43.542858,
+      "lng": -5.665216,
+      "note": "Pinsa and pasta",
+      "url": "https://www.google.com/maps/place/Piccola+Sapori/data=!4m2!3m1!1s0xd367d3107090af9:0xdf28001da18b9af0"
+    },
+    {
+      "cid": "gijon_030",
+      "cat": "dinner",
+      "name": "Pizzeria Ristorante Crettino",
+      "lat": 43.546169,
+      "lng": -5.662456,
+      "note": "Neapolitan-style pizza",
+      "url": "https://www.google.com/maps/place/Pizzeria+Ristorante+Crettino/data=!4m2!3m1!1s0xd367d9efd9bef8f:0x6aa2bb2b07bd9dd1"
+    },
+    {
+      "cid": "gijon_031",
+      "cat": "beer",
+      "name": "La Manuela",
+      "lat": 43.54288,
+      "lng": -5.66481,
+      "note": "Wine, tapas, gildas",
+      "url": "https://www.google.com/maps/place/La+Manuela/data=!4m2!3m1!1s0xd367d621d7c7f4b:0xbd17b6308100cfc4"
+    },
+    {
+      "cid": "gijon_032",
+      "cat": "wine",
+      "name": "El AlVoroto",
+      "lat": 43.543194,
+      "lng": -5.663539,
+      "note": "Vermouth, wine, tapas",
+      "url": "https://www.google.com/maps/place/El+AlVoroto/data=!4m2!3m1!1s0xd367c6657710efd:0xf40752f421023f38"
+    },
+    {
+      "cid": "gijon_033",
+      "cat": "wine",
+      "name": "Coalla San Antonio",
+      "lat": 43.543911,
+      "lng": -5.662923,
+      "note": "Wine, gourmet shop with cheese and cold cuts",
+      "url": "https://www.google.com/maps/place/Coalla+San+Antonio/data=!4m2!3m1!1s0xd367c6684ad382b:0x897ec935fc7012c3"
+    },
+    {
+      "cid": "gijon_034",
+      "cat": "wine",
+      "name": "Malauva",
+      "lat": 43.543168,
+      "lng": -5.663801,
+      "note": "Vermouth and free tapa with your drink",
+      "url": "https://www.google.com/maps/place/Malauva/data=!4m2!3m1!1s0xd367c6656581dbb:0xe934341b928d9864"
+    },
+    {
+      "cid": "gijon_035",
+      "cat": "beer",
+      "name": "Vinatería El Monje",
+      "lat": 43.542604,
+      "lng": -5.665145,
+      "note": "Wine and tapas",
+      "url": "https://www.google.com/maps/place/Vinater%C3%ADa+El+Monje/data=!4m2!3m1!1s0xd367c670a5ab85f:0x6b43fe7599190361"
+    },
+    {
+      "cid": "gijon_036",
+      "cat": "beer",
+      "name": "Jazz & Bar Monk",
+      "lat": 43.541537,
+      "lng": -5.668957,
+      "note": "Jazz bar with craft beer",
+      "url": "https://www.google.com/maps/place/Jazz+%26+Bar+Monk/data=!4m2!3m1!1s0xd367d8eb1c49f03:0x37015fb9a7f32c7a"
+    },
+    {
+      "cid": "gijon_037",
+      "cat": "wine",
+      "name": "Zero5 wine bar",
+      "lat": 43.536687,
+      "lng": -5.664715,
+      "note": "Cafe / wine bar with sandwiches",
+      "url": "https://www.google.com/maps/place/Zero5+wine+bar/data=!4m2!3m1!1s0xd367c8bc15dfaab:0x8a924c4b544c80d5"
+    },
+    {
+      "cid": "gijon_038",
+      "cat": "beer",
+      "name": "Cervecería Vinatería Escala",
+      "lat": 43.537057,
+      "lng": -5.65694,
+      "note": "Craft beer",
+      "url": "https://www.google.com/maps/place/Cervecer%C3%ADa+Vinater%C3%ADa+Escala/data=!4m2!3m1!1s0xd367c62ba007683:0x95b71dcf9e563465"
+    },
+    {
+      "cid": "gijon_039",
+      "cat": "coffee",
+      "name": "Cervecería Orilla",
+      "lat": 43.53997,
+      "lng": -5.656517,
+      "note": "Craft beer, mini pizzas and focaccia",
+      "url": "https://www.google.com/maps/place/Cervecer%C3%ADa+Orilla/data=!4m2!3m1!1s0xd367dddfe7662b5:0x4da868d8bf6dae51"
+    },
+    {
+      "cid": "gijon_040",
+      "cat": "beer",
+      "name": "El Coleccionista",
+      "lat": 43.544372,
+      "lng": -5.663411,
+      "note": "Craft beers, lots of bottles too",
+      "url": "https://www.google.com/maps/place/El+Coleccionista/data=!4m2!3m1!1s0xd367c6638f5e751:0x2b6a282ca526d148"
+    },
+    {
+      "cid": "gijon_041",
+      "cat": "cocktails",
+      "name": "San Telmo",
+      "lat": 43.544388,
+      "lng": -5.662422,
+      "note": "Cocktails. (Plus good reviews for croquettes)",
+      "url": "https://www.google.com/maps/place/San+Telmo/data=!4m2!3m1!1s0xd367d04f7a5ceef:0xe2425b296c1b8a77"
+    },
+    {
+      "cid": "gijon_042",
+      "cat": "beer",
+      "name": "Casa Lúpulo Taproom",
+      "lat": 43.543554,
+      "lng": -5.662685,
+      "note": "Craft beer. 16 rotating taps.",
+      "url": "https://www.google.com/maps/place/Casa+L%C3%BApulo+Taproom/data=!4m2!3m1!1s0xd367d931bb01fe3:0xcb541d1d8e52aa13"
+    },
+    {
+      "cid": "gijon_043",
+      "cat": "wine",
+      "name": "Lugar del Vino",
+      "lat": 43.542927,
+      "lng": -5.662766,
+      "note": "Wine bar with snacks (cheese, hummus)",
+      "url": "https://www.google.com/maps/place/Lugar+del+Vino/data=!4m2!3m1!1s0xd367d9e1e6a598f:0xdb9d52ce1b446437"
+    },
+    {
+      "cid": "gijon_044",
+      "cat": "wine",
+      "name": "Cadejo Wine Bar",
+      "lat": 43.54182,
+      "lng": -5.666567,
+      "note": "A proper wine bar - but it's all natural wines :/",
+      "url": "https://www.google.com/maps/place/Cadejo+Wine+Bar/data=!4m2!3m1!1s0xd367d8eaa47f6ad:0x2e971292f6386310"
+    },
+    {
+      "cid": "gijon_045",
+      "cat": "cocktails",
+      "name": "Varsovia",
+      "lat": 43.543539,
+      "lng": -5.661572,
+      "note": "In Top 3 Cocktail Bars in Asturias",
+      "url": "https://www.google.com/maps/place/Varsovia/data=!4m2!3m1!1s0xd367c65d5bf77a1:0x1c1c6c6c3136fc64"
+    },
+    {
+      "cid": "gijon_046",
+      "cat": "coffee",
+      "name": "NUBO",
+      "lat": 43.538987,
+      "lng": -5.661596,
+      "note": "Coffee",
+      "url": "https://www.google.com/maps/place/NUBO/data=!4m2!3m1!1s0xd367da101af57ad:0xd5e19c905892d7e2"
+    },
+    {
+      "cid": "gijon_047",
+      "cat": "coffee",
+      "name": "Futuro café 2.0",
+      "lat": 43.546003,
+      "lng": -5.6647,
+      "note": "Wine bar with vareniki",
+      "url": "https://www.google.com/maps/place/Futuro+caf%C3%A9+2.0/data=!4m2!3m1!1s0xd367dedbfb00f01:0x1a2c52e103ddf424"
+    },
+    {
+      "cid": "gijon_048",
+      "cat": "dinner",
+      "name": "TACOJON",
+      "lat": 43.538365,
+      "lng": -5.661316,
+      "note": "Tacos",
+      "url": "https://www.google.com/maps/place/TACOJON/data=!4m2!3m1!1s0xd367debf3bf65eb:0x1a6b13058525a3f0"
+    },
+    {
+      "cid": "gijon_049",
+      "cat": "dinner",
+      "name": "Greeky Gijón",
+      "lat": 43.543596,
+      "lng": -5.664173,
+      "note": "Gyros",
+      "url": "https://www.google.com/maps/place/Greeky+Gij%C3%B3n/data=!4m2!3m1!1s0xd367d0060bfb133:0xb967d83e13d8c628"
+    },
+    {
+      "cid": "gijon_050",
+      "cat": "dinner",
+      "name": "La Mesa de Básima",
+      "lat": 43.542826,
+      "lng": -5.665259,
+      "note": "Hummus place (Palestinian)",
+      "url": "https://www.google.com/maps/place/La+Mesa+de+B%C3%A1sima/data=!4m2!3m1!1s0xd367dd0c62b98a5:0x229866c165e7dbec"
+    },
+    {
+      "cid": "gijon_051",
+      "cat": "dinner",
+      "name": "La Teya",
+      "lat": 43.546239,
+      "lng": -5.664582,
+      "note": "Vegan restaurant with hummus, falafel, beyond burgers",
+      "url": "https://www.google.com/maps/place/La+Teya/data=!4m2!3m1!1s0xd367c686465686d:0xc3a24571e24fab8d"
+    }
+  ],
+  "neighbourhoods": []
+}

@@ -5,5 +5,19 @@
     "subtitle": "trip map",
     "blurb": "Four slow nights in the Basque Country — pintxos, txakoli and the Guggenheim.",
     "accent": "#c26b3d"
+  },
+  {
+    "id": "gijon",
+    "title": "Gijón",
+    "subtitle": "trip map",
+    "blurb": "Asturian coast — cider, coffee and pinchos between the marina and San Lorenzo.",
+    "accent": "#3f6ea3"
+  },
+  {
+    "id": "oviedo",
+    "title": "Oviedo",
+    "subtitle": "day trip",
+    "blurb": "A day in Asturias' capital — cider bars, pre-Romanesque corners and old-town pinchos.",
+    "accent": "#8c2f4a"
   }
 ]
