@@ -25,8 +25,8 @@ func newTestServer(t *testing.T) *httptest.Server {
 	db = d
 	t.Cleanup(func() { d.Close(); db = prev })
 
-	web := fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<!DOCTYPE html>")}}
-	srv := httptest.NewServer(newMux(web))
+	web := fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<!DOCTYPE html><script>window.ENV={cartoApiKey: \"test-key\"}</script>")}}
+	srv := httptest.NewServer(newMux(web, config{CartoAPIKey: "test-key"}))
 	t.Cleanup(srv.Close)
 	return srv
 }
