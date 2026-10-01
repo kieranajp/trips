@@ -88,6 +88,15 @@ approximation notice, while false makes no official-boundary claim. Optional
 `label` (nonblank, at most 120 characters), `labelAt` (coordinate inside the
 polygon) and `labelMinZoom` (integer 0–19) are retained in files.
 
+Areas may also include an optional `ratings` object, for example
+`"ratings": {"touristiness": 2, "foodDrink": 5, "ourKindOfPlace": 4}`.
+These are subjective travel ratings: 📷 Touristiness (higher means more touristy),
+🍷 Food & drink interest, and ❤️ Our kind of place. Each supplied score must be
+an integer from 1 to 5. Individual scores may be omitted; missing scores are not
+inferred or displayed. Empty ratings are allowed; unknown rating fields are rejected.
+Cards and the explorer show the same labels and numeric scores. Ratings survive
+export, edits and import for any trip; older files without ratings remain valid.
+
 Apply first saves on this device, then syncs to the server. Pending and failed
 writes stay local across reload; **Retry sync** sends them again. Sign in if the
 server rejects an unauthorised write. Focus updates cannot overwrite a pending

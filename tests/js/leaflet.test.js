@@ -422,7 +422,8 @@ test("showArea enables polygons, fits the selected outline and leaves focus unto
   tripMap.showArea("second");
   assert.equal(areasOn.value, true);
   assert.equal(map.currentPopup, created.polygons[1].getPopup());
-  assert.deepEqual(map.fitted, { points: created.polygons[1].ring, opts: { padding: [40, 40], maxZoom: 16 } });
+  assert.equal(created.polygons[1].getPopup().options.autoPan, true);
+  assert.deepEqual(map.fitted, { points: created.polygons[1].ring, opts: { padding: [40, 40], maxZoom: 16, animate: false } });
   created.polygons[0].events.mouseover();
   assert.equal(map.currentPopup, created.polygons[1].getPopup());
   const fitted = map.fitted;

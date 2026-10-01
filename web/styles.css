@@ -226,3 +226,15 @@ main { flex: 1; min-height: 0; position: relative; }
 .area-popup .leaflet-popup-content { max-height: 35vh; overflow-y: auto; overflow-wrap: anywhere; }
 .side:has(.area-explorer[open]) { overflow-y: auto; }
 .side:has(.area-explorer[open]) .pinlist { flex: none; overflow: visible; }
+
+.area-ratings { margin-top: 12px; font-size: 12px; line-height: 1.45; }
+.rating-caption { color: var(--muted); font-size: 11px; }
+.area-ratings dl { margin: 6px 0 12px; }
+.area-rating { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 4px 0; }
+.area-rating dt { min-width: 0; }
+.area-rating dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.area-entry .area-ratings { margin: 12px 10px; }
+
+@media (max-width: 720px) {
+  .area-popup .leaflet-popup-content { max-height: 18vh; }
+}

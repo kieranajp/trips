@@ -1,8 +1,10 @@
+import { AREA_RATINGS } from './area-ratings.js';
+
 export const MAX_AREA_FILE_BYTES = 256 * 1024;
 export const MAX_AREAS = 100;
 
 const REQUIRED = ['id', 'name', 'note', 'color', 'approximate', 'ring'];
-const OPTIONAL = ['label', 'labelAt', 'labelMinZoom'];
+const OPTIONAL = ['label', 'labelAt', 'labelMinZoom', 'ratings'];
 const LATITUDE_LIMIT = 85.05112878;
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -127,8 +129,23 @@ export function validateAreas(value) {
     const ring = validateRing(entry.ring, `${path}.ring`, errors);
     if (own(entry, 'labelAt') && coordinate(entry.labelAt, `${path}.labelAt`, errors) && ring && !contains(ring, entry.labelAt)) error(errors, `${path}.labelAt`, 'anchor-outside', 'The label anchor must lie within the polygon.');
     if (own(entry, 'labelMinZoom') && (!Number.isInteger(entry.labelMinZoom) || entry.labelMinZoom < 0 || entry.labelMinZoom > 19)) error(errors, `${path}.labelMinZoom`, 'zoom', 'Label zoom must be an integer from 0 to 19.');
+    const ratings = {};
+    if (own(entry, 'ratings')) {
+      if (!object(entry.ratings)) error(errors, `${path}.ratings`, 'type', 'Ratings must be an object.');
+      else {
+        for (const key of Object.keys(entry.ratings)) {
+          if (!AREA_RATINGS.some(rating => rating.key === key)) error(errors, `${path}.ratings.${key}`, 'unknown-field', 'Unknown rating field.');
+        }
+        for (const { key } of AREA_RATINGS) {
+          if (!own(entry.ratings, key)) continue;
+          const value = entry.ratings[key];
+          if (!Number.isInteger(value) || value < 1 || value > 5) error(errors, `${path}.ratings.${key}`, 'rating', 'Ratings must be integers from 1 to 5.');
+          else ratings[key] = value;
+        }
+      }
+    }
     const normalized = {};
-    for (const key of [...REQUIRED, ...OPTIONAL]) if (own(entry, key)) normalized[key] = key === 'ring' ? ring : key === 'labelAt' ? [...(Array.isArray(entry[key]) ? entry[key] : [])] : entry[key];
+    for (const key of [...REQUIRED, ...OPTIONAL]) if (own(entry, key)) normalized[key] = key === 'ring' ? ring : key === 'labelAt' ? [...(Array.isArray(entry[key]) ? entry[key] : [])] : key === 'ratings' ? ratings : entry[key];
     return normalized;
   });
   return { areas: errors.length ? null : areas, errors };

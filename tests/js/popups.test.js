@@ -93,3 +93,19 @@ test("area popups show approximation only when marked and escape imported conten
   assert.ok(neighbourhoodPopupHtml({ ...area, approximate: true }).includes("Approximate travel area"));
   assert.ok(!neighbourhoodPopupHtml({ ...area, approximate: false }).includes("Approximate travel area"));
 });
+
+
+test("area cards render only supplied ratings with readable accessible labels", () => {
+  const area = { name: "Area", note: "Note", color: "#123456" };
+  for (const ratings of [undefined, {}]) {
+    assert.ok(!neighbourhoodPopupHtml({ ...area, ratings }).includes("Subjective travel ratings"));
+  }
+  const card = neighbourhoodPopupHtml({ ...area, ratings: { touristiness: 2, foodDrink: 5, ourKindOfPlace: 4 } });
+  for (const text of ["Subjective travel ratings", "Touristiness", "Food &amp; drink interest", "Our kind of place", "2/5", "5/5", "4/5"]) assert.ok(card.includes(text));
+  assert.equal((card.match(/aria-hidden="true"/g) || []).length, 3);
+  assert.ok(card.includes('aria-label="4 out of 5"'));
+  const partial = neighbourhoodPopupHtml({ ...area, ratings: { ourKindOfPlace: 1 } });
+  assert.ok(partial.includes("1/5"));
+  assert.ok(!partial.includes("Touristiness"));
+  assert.ok(!partial.includes("Food &amp; drink interest"));
+});

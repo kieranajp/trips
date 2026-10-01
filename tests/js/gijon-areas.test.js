@@ -37,6 +37,23 @@ test('authored seeds obey the shared contract and round-trip through the public 
   assert.deepEqual(parsed.document.areas, trip.neighbourhoods);
 });
 
+test('Gijón seeds retain the authored touristiness, food and drink, and personal fit scores', () => {
+  const scores = {
+    'la-arena': [2, 5, 4],
+    'cimavilla': [3, 5, 5],
+    'centro-el-carmen': [3, 5, 5],
+    'marina-el-muelle': [4, 3, 3],
+    'fomento': [2, 3, 2],
+    'el-llano': [1, 3, 3],
+    'poniente-natahoyo-west': [1, 2, 2],
+    'somio-east': [1, 4, 2],
+  };
+  for (const area of trip.neighbourhoods) {
+    const [touristiness, foodDrink, ourKindOfPlace] = scores[area.id];
+    assert.deepEqual(area.ratings, { touristiness, foodDrink, ourKindOfPlace });
+  }
+});
+
 test('outlines and label anchors remain local to Gijón and dense zones have gated short labels', () => {
   for (const area of trip.neighbourhoods) {
     for (const [lat, lng] of [...area.ring, area.labelAt]) {

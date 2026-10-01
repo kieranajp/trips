@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { validateAreas, adaptSeeds, parseAreaFile, serializeAreas, planReplacement, MAX_AREA_FILE_BYTES } from '../../web/lib/areas.js';
+import { AREA_RATINGS, areaRatingRows } from '../../web/lib/area-ratings.js';
 
 const area = (changes = {}) => ({ id: 'centre', name: 'Centre', note: 'A note.', color: '#c26b3d', approximate: true,
   ring: [[43, -5], [43, -4], [44, -4], [44, -5]], ...changes });
@@ -152,4 +153,61 @@ test('serialization falls back to compact JSON for a valid large import', () => 
   const text = serializeAreas('demo', areas);
   assert.ok(new TextEncoder().encode(text).length <= MAX_AREA_FILE_BYTES);
   assert.equal(parseAreaFile(text, 'demo').document.areas.length, 62);
+});
+
+test('ratings are optional, partial, detached and canonical across round trips and replacements', () => {
+  const legacy = validateAreas([area()]).areas[0];
+  assert.equal(Object.hasOwn(legacy, 'ratings'), false);
+  assert.deepEqual(validateAreas([area({ ratings: {} })]).areas[0].ratings, {});
+  assert.deepEqual(validateAreas([area({ ratings: { foodDrink: 1 } })]).areas[0].ratings, { foodDrink: 1 });
+  const input = area({ ratings: { ourKindOfPlace: 5, foodDrink: 4, touristiness: 1 } });
+  const normalized = validateAreas([input]).areas[0];
+  assert.deepEqual(Object.keys(normalized.ratings), ['touristiness', 'foodDrink', 'ourKindOfPlace']);
+  normalized.ratings.touristiness = 2;
+  assert.equal(input.ratings.touristiness, 1);
+  const parsed = parseAreaFile(serializeAreas('gijon', [input]), 'gijon');
+  assert.deepEqual(parsed.errors, []);
+  assert.deepEqual(parsed.document.areas[0].ratings, input.ratings);
+  assert.deepEqual(adaptSeeds([input])[0].ratings, input.ratings);
+  assert.deepEqual(planReplacement('gijon', [input], parsed.document).changed, []);
+  const changed = planReplacement('gijon', [input], document([area({ ratings: { touristiness: 2, foodDrink: 4, ourKindOfPlace: 5 } })]));
+  assert.deepEqual(changed.changed, ['centre']);
+  assert.deepEqual(planReplacement('gijon', [input], document([area()])).changed, ['centre']);
+});
+
+test('ratings reject unknown fields, nonobjects and values outside integer 1–5 without coercion', () => {
+  for (const ratings of [null, [], '5', true, 5]) {
+    const result = validateAreas([area({ ratings })]);
+    assert.equal(result.areas, null);
+    assert.ok(result.errors.some(error => error.path === 'areas[0].ratings' && error.code === 'type'));
+  }
+  const unknown = validateAreas([area({ ratings: { foodDrink: 5, score: 3 } })]);
+  assert.equal(unknown.areas, null);
+  assert.ok(unknown.errors.some(error => error.path === 'areas[0].ratings.score' && error.code === 'unknown-field'));
+  for (const { key } of AREA_RATINGS) {
+    for (const value of [0, 6, -1, 2.5, '3', true, null, undefined, NaN, Infinity, {}, []]) {
+      const result = validateAreas([area({ ratings: { [key]: value } })]);
+      assert.equal(result.areas, null, `${key}: ${String(value)}`);
+      assert.ok(result.errors.some(error => error.path === `areas[0].ratings.${key}` && error.code === 'rating'));
+    }
+  }
+  const invalidFile = parseAreaFile(JSON.stringify(document([area({ ratings: { foodDrink: '5' } })])), 'gijon');
+  assert.equal(invalidFile.document, null);
+  assert.throws(() => serializeAreas('gijon', [area({ ratings: { foodDrink: 0 } })]), error => error.errors.some(error => error.code === 'rating'));
+});
+
+test('rating rows share labels and emoji and never invent absent or malformed scores', () => {
+  assert.deepEqual(AREA_RATINGS, [
+    { key: 'touristiness', label: 'Touristiness', emoji: '📷' },
+    { key: 'foodDrink', label: 'Food & drink interest', emoji: '🍷' },
+    { key: 'ourKindOfPlace', label: 'Our kind of place', emoji: '❤️' },
+  ]);
+  assert.deepEqual(areaRatingRows(area({ ratings: { foodDrink: 5, touristiness: 2, ourKindOfPlace: 4 } })),
+    AREA_RATINGS.map((metadata, index) => ({ ...metadata, value: [2, 5, 4][index] })));
+  for (const input of [null, undefined, area(), area({ ratings: {} }), area({ ratings: null }), area({ ratings: [] }), area({ ratings: '3' })]) {
+    assert.deepEqual(areaRatingRows(input), []);
+  }
+  assert.deepEqual(areaRatingRows(area({ ratings: { touristiness: '2', foodDrink: 3, ourKindOfPlace: 6, extra: 5 } })),
+    [{ key: 'foodDrink', label: 'Food & drink interest', emoji: '🍷', value: 3 }]);
+  assert.deepEqual(areaRatingRows(area({ ratings: Object.create({ touristiness: 4 }) })), []);
 });

@@ -3,6 +3,7 @@ import { html } from "htm/preact";
 import { areasOn, cats, effectiveAreas, editing, only, search, searchedPins, tab, visiblePins } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toggleVisited, toast } from "../../state/actions.js";
+import { areaRatingRows } from "../../lib/area-ratings.js";
 import { fmtDay } from "../../lib/dates.js";
 import { MAPS_LINK_HINT, isShortMapsLink, resolveMapsLink } from "../../lib/maps.js";
 import { flyTo, invalidate, mountMap, showArea } from "./leaflet.js";
@@ -72,6 +73,19 @@ function PinList() {
     </div>`;
 }
 
+function AreaRatings({ area }) {
+  const ratings = areaRatingRows(area);
+  if (!ratings.length) return null;
+  return html`<div class="area-ratings">
+    <div class="rating-caption">Subjective travel ratings</div>
+    <dl>${ratings.map(({ key, label, emoji, value }) => html`
+      <div class="area-rating" key=${key}>
+        <dt><span aria-hidden="true">${emoji}</span> ${label}</dt>
+        <dd aria-label=${`${value} out of 5`}>${value}/5</dd>
+      </div>`)}</dl>
+  </div>`;
+}
+
 function AreaExplorer() {
   const areas = effectiveAreas.value;
   if (!areas.length) return null;
@@ -85,6 +99,7 @@ function AreaExplorer() {
             <summary>${area.name}</summary>
             ${area.approximate ? html`<div class="area-kind">Approximate travel area</div>` : null}
             <p>${area.note}</p>
+            <${AreaRatings} area=${area}/>
             <button class="btn mini" onClick=${() => showArea(area.id)}>Show on map</button>
           </details>`)}
       </div>

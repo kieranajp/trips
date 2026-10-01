@@ -68,6 +68,7 @@ export function createTripMap(element, definition, L = window.L, areaSource = nu
     activeArea = entry;
     if (persistent) selectedArea = entry;
     entry.polygon.setStyle({ weight: 3, fillOpacity: 0.22 });
+    entry.polygon.getPopup().options.autoPan = persistent;
     entry.polygon.openPopup();
   }
 
@@ -228,7 +229,7 @@ export function createTripMap(element, definition, L = window.L, areaSource = nu
       const entry = areaPolygons.find((item) => item.area.id === id);
       if (!entry) return;
       areasOn.value = true;
-      map.fitBounds(entry.polygon.getBounds(), { padding: [40, 40], maxZoom: 16 });
+      map.fitBounds(entry.polygon.getBounds(), { padding: [40, 40], maxZoom: 16, animate: false });
       openArea(entry, true);
     },
     flyTo(pin) {

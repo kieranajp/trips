@@ -5,6 +5,7 @@
 import { catById } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { escapeHtml } from "../../lib/html.js";
+import { areaRatingRows } from "../../lib/area-ratings.js";
 import { fmtDay } from "../../lib/dates.js";
 
 // A place's `url` can be any string (pasted link, imported file), so only
@@ -36,6 +37,8 @@ export function stayPopupHtml(stay) {
 }
 
 export function neighbourhoodPopupHtml(neighbourhood) {
+  const ratings = areaRatingRows(neighbourhood);
   return `<div class="pop-tag" style="color:${escapeHtml(neighbourhood.color)}">${neighbourhood.approximate ? "Approximate travel area" : "Neighbourhood"}</div>
-    <div class="pop-nm">${escapeHtml(neighbourhood.name)}</div><p class="pop-nt">${escapeHtml(neighbourhood.note)}</p>`;
+    <div class="pop-nm">${escapeHtml(neighbourhood.name)}</div><p class="pop-nt">${escapeHtml(neighbourhood.note)}</p>
+    ${ratings.length ? `<div class="area-ratings"><div class="rating-caption">Subjective travel ratings</div><dl>${ratings.map(({ label, emoji, value }) => `<div class="area-rating"><dt><span aria-hidden="true">${emoji}</span> ${escapeHtml(label)}</dt><dd aria-label="${value} out of 5">${value}/5</dd></div>`).join("")}</dl></div>` : ""}`;
 }

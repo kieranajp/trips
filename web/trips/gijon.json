@@ -576,7 +576,12 @@
         43.5382,
         -5.6501
       ],
-      "labelMinZoom": 13
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 5,
+        "ourKindOfPlace": 4
+      }
     },
     {
       "id": "cimavilla",
@@ -631,7 +636,12 @@
         43.5482,
         -5.6641
       ],
-      "labelMinZoom": 13
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 3,
+        "foodDrink": 5,
+        "ourKindOfPlace": 5
+      }
     },
     {
       "id": "centro-el-carmen",
@@ -678,7 +688,12 @@
         43.5413,
         -5.6638
       ],
-      "labelMinZoom": 14
+      "labelMinZoom": 14,
+      "ratings": {
+        "touristiness": 3,
+        "foodDrink": 5,
+        "ourKindOfPlace": 5
+      }
     },
     {
       "id": "marina-el-muelle",
@@ -741,7 +756,12 @@
         43.54608,
         -5.66562
       ],
-      "labelMinZoom": 15
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 4,
+        "foodDrink": 3,
+        "ourKindOfPlace": 3
+      }
     },
     {
       "id": "fomento",
@@ -772,7 +792,12 @@
         43.5427,
         -5.6676
       ],
-      "labelMinZoom": 15
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 3,
+        "ourKindOfPlace": 2
+      }
     },
     {
       "id": "el-llano",
@@ -807,7 +832,12 @@
         43.531,
         -5.6625
       ],
-      "labelMinZoom": 13
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 3,
+        "ourKindOfPlace": 3
+      }
     },
     {
       "id": "poniente-natahoyo-west",
@@ -850,7 +880,12 @@
         43.537,
         -5.684
       ],
-      "labelMinZoom": 12
+      "labelMinZoom": 12,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 2,
+        "ourKindOfPlace": 2
+      }
     },
     {
       "id": "somio-east",
@@ -889,7 +924,12 @@
         43.539,
         -5.626
       ],
-      "labelMinZoom": 12
+      "labelMinZoom": 12,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 4,
+        "ourKindOfPlace": 2
+      }
     }
   ]
 }
