@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
-import { areasOn, cats, editing, only, search, searchedPins, tab, trip, visiblePins } from "../../state/signals.js";
+import { areasOn, cats, effectiveAreas, editing, only, search, searchedPins, tab, visiblePins } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toggleVisited, toast } from "../../state/actions.js";
+import { areaRatingRows } from "../../lib/area-ratings.js";
 import { fmtDay } from "../../lib/dates.js";
 import { MAPS_LINK_HINT, isShortMapsLink, resolveMapsLink } from "../../lib/maps.js";
-import { flyTo, invalidate, mountMap } from "./leaflet.js";
+import { flyTo, invalidate, mountMap, showArea } from "./leaflet.js";
 import { initSheet } from "./sheet.js";
 
 const truncate = (text, length) => text.length > length ? text.slice(0, length - 1) + "…" : text;
@@ -72,6 +73,39 @@ function PinList() {
     </div>`;
 }
 
+function AreaRatings({ area }) {
+  const ratings = areaRatingRows(area);
+  if (!ratings.length) return null;
+  return html`<div class="area-ratings">
+    <div class="rating-caption">Subjective travel ratings</div>
+    <dl>${ratings.map(({ key, label, emoji, value }) => html`
+      <div class="area-rating" key=${key}>
+        <dt><span aria-hidden="true">${emoji}</span> ${label}</dt>
+        <dd aria-label=${`${value} out of 5`}>${value}/5</dd>
+      </div>`)}</dl>
+  </div>`;
+}
+
+function AreaExplorer() {
+  const areas = effectiveAreas.value;
+  if (!areas.length) return null;
+  return html`
+    <details class="area-explorer">
+      <summary>Explore areas (${areas.length})</summary>
+      ${areas.some((area) => area.approximate) ? html`<p class="area-explanation">Approximate travel areas. Edges are indicative, not official boundaries.</p>` : null}
+      <div class="area-list">
+        ${areas.map((area) => html`
+          <details key=${area.id} class="area-entry">
+            <summary>${area.name}</summary>
+            ${area.approximate ? html`<div class="area-kind">Approximate travel area</div>` : null}
+            <p>${area.note}</p>
+            <${AreaRatings} area=${area}/>
+            <button class="btn mini" onClick=${() => showArea(area.id)}>Show on map</button>
+          </details>`)}
+      </div>
+    </details>`;
+}
+
 export function MapView() {
   const mapRef = useRef();
   const viewRef = useRef();
@@ -80,7 +114,7 @@ export function MapView() {
   useEffect(() => { mountMap(mapRef.current); }, []);
   useEffect(() => initSheet(viewRef.current, sideRef.current, handleRef.current), []);
   useEffect(() => { if (tab.value === "map") invalidate(); }, [tab.value]);
-  const hasNeighbourhoods = trip.value.neighbourhoods?.length;
+  const hasNeighbourhoods = effectiveAreas.value.length;
   return html`
     <section class=${"view" + (tab.value === "map" ? " on" : "")} id="view-map" ref=${viewRef}>
       <div id="map" ref=${mapRef}></div>
@@ -90,9 +124,10 @@ export function MapView() {
         <div class="subtle">Tap a pin in the list to fly to it; tap a category below to show only that.</div>
         <div class="actionbar">
           ${canEdit.value ? html`<button class="btn primary" title="Paste a Google Maps link to add a pin" onClick=${pinFromLink}>+ Paste Maps link</button>` : null}
-          ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle neighbourhood areas"
+          ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle trip areas" aria-pressed=${areasOn.value}
             onClick=${() => (areasOn.value = !areasOn.value)}>Areas: ${areasOn.value ? "on" : "off"}</button>` : null}
         </div>
+        <${AreaExplorer}/>
         <div class="pinsearch">
           <input type="search" placeholder="Search pins & notes…"
             value=${search.value} onInput=${(event) => (search.value = event.target.value)}/>

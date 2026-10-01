@@ -11,7 +11,7 @@
 const CACHE = "trips-v1";
 
 const API_PATHS = ["/state", "/files", "/expand", "/whoami", "/login", "/health"];
-const TILE_HOST = /\.cartocdn\.com$/;
+const TILE_HOST = /(?:\.cartocdn\.com$|^tile\.openstreetmap\.org$)/;
 
 const PRECACHE = ["/", "/styles.css", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 

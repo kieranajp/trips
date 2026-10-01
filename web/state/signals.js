@@ -1,4 +1,5 @@
 import { computed, signal } from "@preact/signals";
+import { adaptSeeds } from "../lib/areas.js";
 
 export const trips = signal([]);
 export const trip = signal(null);
@@ -6,6 +7,10 @@ export const cats = signal([]);
 export const pins = signal([]);
 export const flights = signal([]);
 export const stays = signal([]);
+export const areaOverride = signal(null);
+export const areaErrors = signal([]);
+export const syncStatus = signal({ state: "idle", message: "" });
+export const effectiveAreas = computed(() => areaOverride.value ?? adaptSeeds(trip.value?.neighbourhoods || []));
 export const only = signal(null);
 export const search = signal("");
 export const tab = signal("map");

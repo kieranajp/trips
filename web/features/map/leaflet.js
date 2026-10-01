@@ -1,5 +1,5 @@
 import { effect } from "@preact/signals";
-import { areasOn, catById, editing, pins, stays, trip, visiblePins } from "../../state/signals.js";
+import { areasOn, catById, effectiveAreas, editing, pins, stays, trip, visiblePins } from "../../state/signals.js";
 import { toggleVisited } from "../../state/actions.js";
 import { escapeHtml } from "../../lib/html.js";
 import { homeIconSpec, pinIconSpec } from "./icons.js";
@@ -10,39 +10,158 @@ const hasCoords = (place) => place
   && place.lat != null && place.lng != null
   && !Number.isNaN(+place.lat) && !Number.isNaN(+place.lng);
 
-// createTripMap owns one Leaflet map: base tiles, the marker/stay/
-// neighbourhood layers, and the signal effects that keep them in sync with
-// state. Leaflet stays imperative and outside the Preact tree (see AGENTS.md);
-// this factory just gives that code a boundary — no module globals, effects
-// disposed on destroy(), and L injectable so tests can drive it with a fake.
-export function createTripMap(element, definition, L = window.L) {
+export function createTripMap(element, definition, L = window.L, areaSource = null) {
   const map = L.map(element, { zoomControl: true });
   const env = typeof window !== "undefined" ? window.ENV : null;
   const tileUrl = env?.cartoApiKey
     ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(env.cartoApiKey)}`
-    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+    : "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
   L.tileLayer(tileUrl, {
     maxZoom: 19,
     subdomains: "abcd",
-    attribution: "&copy; OpenStreetMap, &copy; CARTO",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' + (env?.cartoApiKey ? ", &copy; CARTO" : ""),
   }).addTo(map);
   map.setView(definition.center, definition.zoom);
 
   const stayLayer = L.layerGroup().addTo(map);
   const markerLayer = L.layerGroup().addTo(map);
   const neighbourhoodLayer = L.layerGroup();
-  (definition.neighbourhoods || []).forEach((neighbourhood) => {
-    const polygon = L.polygon(neighbourhood.ring, {
-      color: neighbourhood.color,
-      weight: 1.6,
-      dashArray: "5 5",
-      fillColor: neighbourhood.color,
-      fillOpacity: 0.1,
+  let areaPolygons = [];
+  let activeArea = null;
+  let selectedArea = null;
+  let hoveredArea = null;
+  let otherPopup = null;
+  let leaveTimer = null;
+  let cardCleanup = null;
+  const suppressed = new Set();
+
+  function cancelLeave() {
+    clearTimeout(leaveTimer);
+    leaveTimer = null;
+  }
+
+  function dismissArea(suppress = false) {
+    cancelLeave();
+    if (suppress && hoveredArea) suppressed.add(hoveredArea);
+    const previous = activeArea;
+    activeArea = selectedArea = null;
+    cardCleanup?.();
+    cardCleanup = null;
+    if (previous) {
+      previous.polygon.setStyle({ weight: 1.6, fillOpacity: 0.1 });
+      previous.polygon.closePopup();
+    }
+  }
+
+  function scheduleLeave() {
+    cancelLeave();
+    if (selectedArea) return;
+    leaveTimer = setTimeout(() => {
+      if (!selectedArea) dismissArea();
+    }, 180);
+  }
+
+  function openArea(entry, persistent = false) {
+    if (!persistent && (selectedArea || otherPopup || suppressed.has(entry))) return;
+    cancelLeave();
+    if (activeArea !== entry) dismissArea();
+    activeArea = entry;
+    if (persistent) selectedArea = entry;
+    entry.polygon.setStyle({ weight: 3, fillOpacity: 0.22 });
+    entry.polygon.getPopup().options.autoPan = persistent;
+    entry.polygon.openPopup();
+  }
+
+  function onPopupOpen(event) {
+    const entry = areaPolygons.find((item) => item.polygon.getPopup() === event.popup);
+    if (!entry) {
+      otherPopup = event.popup;
+      dismissArea();
+      return;
+    }
+    otherPopup = null;
+    cardCleanup?.();
+    const card = event.popup.getElement();
+    const enter = () => cancelLeave();
+    const leave = () => scheduleLeave();
+    card?.addEventListener("mouseenter", enter);
+    card?.addEventListener("mouseleave", leave);
+    cardCleanup = () => {
+      card?.removeEventListener("mouseenter", enter);
+      card?.removeEventListener("mouseleave", leave);
+    };
+  }
+
+  function onPopupClose(event) {
+    if (event.popup === otherPopup) otherPopup = null;
+    if (activeArea?.polygon.getPopup() === event.popup) dismissArea(true);
+  }
+
+  function onKeyDown(event) {
+    if (event.key === "Escape") dismissArea(true);
+  }
+
+  function renderLabels() {
+    areaPolygons.forEach(({ area, polygon }) => {
+      const show = map.getZoom() >= (area.labelMinZoom ?? 0);
+      if (!show) polygon.unbindTooltip();
+      else if (!polygon.getTooltip()) {
+        polygon.bindTooltip(escapeHtml(area.label || area.name), {
+          permanent: true, direction: "center", className: "nb-label", interactive: false,
+        });
+        if (area.labelAt) polygon.getTooltip().setLatLng(area.labelAt);
+      }
     });
-    polygon.bindPopup(neighbourhoodPopupHtml(neighbourhood), { maxWidth: 250 });
-    polygon.bindTooltip(escapeHtml(neighbourhood.name), { permanent: true, direction: "center", className: "nb-label" });
-    neighbourhoodLayer.addLayer(polygon);
-  });
+  }
+
+  function clearAreas() {
+    dismissArea();
+    hoveredArea = null;
+    suppressed.clear();
+    areaPolygons.forEach(({ polygon }) => {
+      polygon.closePopup();
+      polygon.unbindPopup();
+      polygon.unbindTooltip();
+      polygon.off();
+    });
+    areaPolygons = [];
+    neighbourhoodLayer.clearLayers();
+  }
+
+  function renderAreas() {
+    const areas = areaSource ? areaSource.value : definition.neighbourhoods || [];
+    clearAreas();
+    areas.forEach((area) => {
+      const polygon = L.polygon(area.ring, {
+        color: area.color, weight: 1.6, dashArray: "5 5",
+        fillColor: area.color, fillOpacity: 0.1,
+      });
+      const entry = { area, polygon };
+      polygon.bindPopup(neighbourhoodPopupHtml(area), { maxWidth: 300, className: "area-popup", autoPan: false, closeOnEscapeKey: false });
+      polygon.on("mouseover", () => {
+        hoveredArea = entry;
+        openArea(entry);
+      });
+      polygon.on("mouseout", () => {
+        if (hoveredArea === entry) hoveredArea = null;
+        suppressed.delete(entry);
+        if (activeArea === entry) scheduleLeave();
+      });
+      polygon.on("click", () => openArea(entry, true));
+      polygon.on("tooltipopen", () => {
+        if (area.labelAt) polygon.getTooltip().setLatLng(area.labelAt);
+      });
+      neighbourhoodLayer.addLayer(polygon);
+      areaPolygons.push(entry);
+    });
+    renderLabels();
+  }
+
+  map.on("popupopen", onPopupOpen);
+  map.on("popupclose", onPopupClose);
+  map.on("zoomend", renderLabels);
+  const keyboardTarget = typeof document !== "undefined" ? document : null;
+  keyboardTarget?.addEventListener("keydown", onKeyDown);
 
   const markers = {};
 
@@ -90,13 +209,29 @@ export function createTripMap(element, definition, L = window.L) {
   }
 
   const disposers = [
+    effect(renderAreas),
     effect(renderMarkers),
     effect(renderStays),
-    effect(() => { areasOn.value ? neighbourhoodLayer.addTo(map) : map.removeLayer(neighbourhoodLayer); }),
+    effect(() => {
+      if (areasOn.value) neighbourhoodLayer.addTo(map);
+      else {
+        dismissArea();
+        suppressed.clear();
+        hoveredArea = null;
+        map.removeLayer(neighbourhoodLayer);
+      }
+    }),
   ];
   fitAll();
 
   return {
+    showArea(id) {
+      const entry = areaPolygons.find((item) => item.area.id === id);
+      if (!entry) return;
+      areasOn.value = true;
+      map.fitBounds(entry.polygon.getBounds(), { padding: [40, 40], maxZoom: 16, animate: false });
+      openArea(entry, true);
+    },
     flyTo(pin) {
       map.setView([pin.lat, pin.lng], 16);
       markers[pin.id]?.openPopup();
@@ -111,6 +246,11 @@ export function createTripMap(element, definition, L = window.L) {
     },
     destroy() {
       disposers.splice(0).forEach((dispose) => dispose());
+      clearAreas();
+      map.off("popupopen", onPopupOpen);
+      map.off("popupclose", onPopupClose);
+      map.off("zoomend", renderLabels);
+      keyboardTarget?.removeEventListener("keydown", onKeyDown);
       map.remove();
     },
   };
@@ -123,7 +263,7 @@ let instance = null;
 
 export function mountMap(element) {
   if (!instance) {
-    instance = createTripMap(element, trip.value);
+    instance = createTripMap(element, trip.value, window.L, effectiveAreas);
     followPermalink(instance);
   }
   return instance;
@@ -132,3 +272,5 @@ export function mountMap(element) {
 export function invalidate() { instance?.invalidate(); }
 export function resizeMap() { instance?.resize(); }
 export function flyTo(pin) { instance?.flyTo(pin); }
+
+export function showArea(id) { instance?.showArea(id); }

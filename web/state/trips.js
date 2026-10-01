@@ -1,4 +1,5 @@
-import { cats, flights, pins, stays, trip, trips } from "./signals.js";
+import { areaErrors, areaOverride, cats, flights, pins, stays, trip, trips } from "./signals.js";
+import { validateAreas } from "../lib/areas.js";
 import { localLoad } from "./persistence.js";
 
 const validId = (id) => /^[a-z0-9-]+$/.test(id || "");
@@ -17,6 +18,7 @@ export function freshState(def) {
       src: item.cid,
     }));
   return {
+    areaOverride: null,
     categories: def.categories.map((category) => ({ ...category })),
     pins: seededPins,
     flights: (def.flights || []).map((flight) => ({ ...flight })),
@@ -51,6 +53,9 @@ export async function boot() {
   trip.value = definition;
   document.title = `${definition.title} — ${definition.subtitle}`;
   const state = localLoad(id) || freshState(definition);
+  const override = state.areaOverride == null ? { areas: null, errors: [] } : validateAreas(state.areaOverride);
+  areaOverride.value = override.errors.length ? null : override.areas;
+  areaErrors.value = override.errors;
   cats.value = state.categories;
   pins.value = state.pins;
   flights.value = state.flights || [];

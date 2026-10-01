@@ -546,5 +546,390 @@
       "url": "https://www.google.com/maps/place/La+Teya/data=!4m2!3m1!1s0xd367c686465686d:0xc3a24571e24fab8d"
     }
   ],
-  "neighbourhoods": []
+  "neighbourhoods": [
+    {
+      "id": "la-arena",
+      "name": "La Arena",
+      "note": "Residential streets beside the beach, with coffee stops and chigres. Fit for this trip: high.",
+      "color": "#c26b3d",
+      "approximate": true,
+      "ring": [
+        [
+          43.5412,
+          -5.6548
+        ],
+        [
+          43.5389,
+          -5.6439
+        ],
+        [
+          43.5357,
+          -5.6452
+        ],
+        [
+          43.5359,
+          -5.6548
+        ]
+      ],
+      "label": "La Arena",
+      "labelAt": [
+        43.5382,
+        -5.6501
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 5,
+        "ourKindOfPlace": 4
+      }
+    },
+    {
+      "id": "cimavilla",
+      "name": "Cimavilla",
+      "note": "The old fishing quarter: cider and chigres among streets also visited by tourists. Fit for this trip: very high.",
+      "color": "#6d7f45",
+      "approximate": true,
+      "ring": [
+        [
+          43.5481,
+          -5.66611
+        ],
+        [
+          43.54917,
+          -5.66558
+        ],
+        [
+          43.54943,
+          -5.6647
+        ],
+        [
+          43.54878,
+          -5.66154
+        ],
+        [
+          43.54743,
+          -5.6603
+        ],
+        [
+          43.54617,
+          -5.66071
+        ],
+        [
+          43.54552,
+          -5.66195
+        ],
+        [
+          43.54569,
+          -5.66386
+        ],
+        [
+          43.54679,
+          -5.66502
+        ],
+        [
+          43.54775,
+          -5.66611
+        ]
+      ],
+      "label": "Cimavilla",
+      "labelAt": [
+        43.5482,
+        -5.6641
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 3,
+        "foodDrink": 5,
+        "ourKindOfPlace": 5
+      }
+    },
+    {
+      "id": "centro-el-carmen",
+      "name": "Centro / El Carmen",
+      "note": "A dense cluster of wine bars, vermouth and coffee stops in the centre and El Carmen. Fit for this trip: very high.",
+      "color": "#80579b",
+      "approximate": true,
+      "ring": [
+        [
+          43.5442,
+          -5.6632
+        ],
+        [
+          43.5414,
+          -5.6553
+        ],
+        [
+          43.5366,
+          -5.6553
+        ],
+        [
+          43.5366,
+          -5.6665
+        ],
+        [
+          43.5398,
+          -5.6699
+        ],
+        [
+          43.5416,
+          -5.6699
+        ],
+        [
+          43.54165,
+          -5.6678
+        ],
+        [
+          43.54315,
+          -5.6653
+        ]
+      ],
+      "label": "Centro / Carmen",
+      "labelAt": [
+        43.5413,
+        -5.6638
+      ],
+      "labelMinZoom": 14,
+      "ratings": {
+        "touristiness": 3,
+        "foodDrink": 5,
+        "ourKindOfPlace": 5
+      }
+    },
+    {
+      "id": "marina-el-muelle",
+      "name": "Marina / El Muelle",
+      "note": "A waterfront walk around the marina and El Muelle. Visitor-oriented; choose eating stops selectively. Fit for this trip: medium.",
+      "color": "#3c8796",
+      "approximate": true,
+      "ring": [
+        [
+          43.54732,
+          -5.66751
+        ],
+        [
+          43.54713,
+          -5.66676
+        ],
+        [
+          43.54552,
+          -5.66457
+        ],
+        [
+          43.54522,
+          -5.66388
+        ],
+        [
+          43.5445,
+          -5.66403
+        ],
+        [
+          43.54382,
+          -5.66498
+        ],
+        [
+          43.54402,
+          -5.66549
+        ],
+        [
+          43.54468,
+          -5.66459
+        ],
+        [
+          43.54525,
+          -5.66448
+        ],
+        [
+          43.54566,
+          -5.66517
+        ],
+        [
+          43.5469,
+          -5.66723
+        ],
+        [
+          43.54701,
+          -5.66781
+        ]
+      ],
+      "label": "El Muelle",
+      "labelAt": [
+        43.54608,
+        -5.66562
+      ],
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 4,
+        "foodDrink": 3,
+        "ourKindOfPlace": 3
+      }
+    },
+    {
+      "id": "fomento",
+      "name": "Fomento",
+      "note": "Late-night bars near the western waterfront. Fit for this trip: lower.",
+      "color": "#b45a78",
+      "approximate": true,
+      "ring": [
+        [
+          43.54243,
+          -5.66929
+        ],
+        [
+          43.54359,
+          -5.6665
+        ],
+        [
+          43.54338,
+          -5.66558
+        ],
+        [
+          43.54198,
+          -5.66784
+        ]
+      ],
+      "label": "Fomento",
+      "labelAt": [
+        43.5427,
+        -5.6676
+      ],
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 3,
+        "ourKindOfPlace": 2
+      }
+    },
+    {
+      "id": "el-llano",
+      "name": "El Llano",
+      "note": "An everyday residential area with local character, away from the main visitor waterfront. Fit for this trip: medium.",
+      "color": "#ad8739",
+      "approximate": true,
+      "ring": [
+        [
+          43.5359,
+          -5.669
+        ],
+        [
+          43.5359,
+          -5.656
+        ],
+        [
+          43.5311,
+          -5.6549
+        ],
+        [
+          43.5246,
+          -5.658
+        ],
+        [
+          43.5246,
+          -5.669
+        ]
+      ],
+      "label": "El Llano",
+      "labelAt": [
+        43.531,
+        -5.6625
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 3,
+        "ourKindOfPlace": 3
+      }
+    },
+    {
+      "id": "poniente-natahoyo-west",
+      "name": "Poniente / Natahoyo / west",
+      "note": "The industrial and residential west, including the Poniente and Natahoyo side of town. Fit for this trip: low.",
+      "color": "#557da8",
+      "approximate": true,
+      "ring": [
+        [
+          43.5439,
+          -5.674
+        ],
+        [
+          43.5422,
+          -5.687
+        ],
+        [
+          43.5384,
+          -5.704
+        ],
+        [
+          43.529,
+          -5.702
+        ],
+        [
+          43.529,
+          -5.676
+        ],
+        [
+          43.537,
+          -5.671
+        ],
+        [
+          43.5422,
+          -5.671
+        ]
+      ],
+      "label": "Poniente / west",
+      "labelAt": [
+        43.537,
+        -5.684
+      ],
+      "labelMinZoom": 12,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 2,
+        "ourKindOfPlace": 2
+      }
+    },
+    {
+      "id": "somio-east",
+      "name": "Somió / east",
+      "note": "Leafy villas and destination dining on the eastern side of Gijón. Fit for this trip: low.",
+      "color": "#4e9479",
+      "approximate": true,
+      "ring": [
+        [
+          43.5411,
+          -5.6428
+        ],
+        [
+          43.548,
+          -5.634
+        ],
+        [
+          43.547,
+          -5.613
+        ],
+        [
+          43.535,
+          -5.609
+        ],
+        [
+          43.528,
+          -5.622
+        ],
+        [
+          43.533,
+          -5.64
+        ]
+      ],
+      "label": "Somió / east",
+      "labelAt": [
+        43.539,
+        -5.626
+      ],
+      "labelMinZoom": 12,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 4,
+        "ourKindOfPlace": 2
+      }
+    }
+  ]
 }

@@ -200,3 +200,41 @@ main { flex: 1; min-height: 0; position: relative; }
 .catrow.ro .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 .catrow.ro .nm { flex: 1; font-size: 13px; }
 .idea-tag { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.area-preview, .area-errors, .area-sync { padding: 12px 14px; margin: 12px 0; border: 1px solid var(--line); border-radius: 4px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.area-preview { background: var(--panel); }
+.area-preview p, .area-errors p, .area-sync p { margin: 0 0 8px; }
+.area-preview dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 12px; }
+.area-preview dt { font-weight: 600; }
+.area-preview dd { margin: 0; }
+.area-errors { color: #8c2d1c; border-color: rgba(163, 52, 31, .4); }
+.area-errors ul { padding-left: 20px; margin: 8px 0; }
+.area-sync-help { margin-top: 12px !important; }
+.btn:focus-visible { outline: 2px solid #2c8f96; outline-offset: 3px; }
+.pop-nt { white-space: pre-wrap; }
+
+.area-explorer { flex: none; margin: 0 15px 12px; font-size: 12px; border: 1px solid var(--line); border-radius: 3px; }
+.area-explorer summary { cursor: pointer; padding: 10px; font-weight: 500; }
+.area-explorer summary:focus-visible { outline: 2px solid #2c8f96; outline-offset: -2px; }
+.area-list { max-height: 30vh; overflow-y: auto; overscroll-behavior: contain; }
+.area-entry { border-top: 1px solid var(--line); }
+.area-entry p { margin: 4px 10px 10px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.area-entry .btn { margin: 0 10px 12px; }
+.area-explanation { margin: 0 10px 10px; line-height: 1.5; color: var(--muted); }
+.area-kind { margin: 0 10px 6px; font-size: 10px; color: var(--muted); }
+.leaflet-tooltip.nb-label { pointer-events: none; }
+.area-popup .leaflet-popup-content { max-height: 35vh; overflow-y: auto; overflow-wrap: anywhere; }
+.side:has(.area-explorer[open]) { overflow-y: auto; }
+.side:has(.area-explorer[open]) .pinlist { flex: none; overflow: visible; }
+
+.area-ratings { margin-top: 12px; font-size: 12px; line-height: 1.45; }
+.rating-caption { color: var(--muted); font-size: 11px; }
+.area-ratings dl { margin: 6px 0 12px; }
+.area-rating { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 4px 0; }
+.area-rating dt { min-width: 0; }
+.area-rating dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.area-entry .area-ratings { margin: 12px 10px; }
+
+@media (max-width: 720px) {
+  .area-popup .leaflet-popup-content { max-height: 18vh; }
+}

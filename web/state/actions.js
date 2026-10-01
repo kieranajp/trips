@@ -1,4 +1,4 @@
-import { cats, editingLog, flights, only, pins, stays, toastMsg, trip, onMap } from "./signals.js";
+import { areaOverride, cats, editingLog, flights, only, pins, stays, toastMsg, trip, onMap } from "./signals.js";
 import { save } from "./persistence.js";
 import { freshState } from "./trips.js";
 import { uid } from "../lib/uid.js";
@@ -112,8 +112,9 @@ export function toggleOnly(id) {
 }
 
 export function reset() {
-  if (!confirm("Reset to the seeded set? Your added pins go.")) return;
+  if (!confirm("Reset everything to the seeded set? Added pins and custom areas will be removed.")) return;
   const state = freshState(trip.value);
+  areaOverride.value = null;
   cats.value = state.categories;
   pins.value = state.pins;
   flights.value = state.flights;
