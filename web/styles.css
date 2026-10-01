@@ -212,3 +212,17 @@ main { flex: 1; min-height: 0; position: relative; }
 .area-sync-help { margin-top: 12px !important; }
 .btn:focus-visible { outline: 2px solid #2c8f96; outline-offset: 3px; }
 .pop-nt { white-space: pre-wrap; }
+
+.area-explorer { flex: none; margin: 0 15px 12px; font-size: 12px; border: 1px solid var(--line); border-radius: 3px; }
+.area-explorer summary { cursor: pointer; padding: 10px; font-weight: 500; }
+.area-explorer summary:focus-visible { outline: 2px solid #2c8f96; outline-offset: -2px; }
+.area-list { max-height: 30vh; overflow-y: auto; overscroll-behavior: contain; }
+.area-entry { border-top: 1px solid var(--line); }
+.area-entry p { margin: 4px 10px 10px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.area-entry .btn { margin: 0 10px 12px; }
+.area-explanation { margin: 0 10px 10px; line-height: 1.5; color: var(--muted); }
+.area-kind { margin: 0 10px 6px; font-size: 10px; color: var(--muted); }
+.leaflet-tooltip.nb-label { pointer-events: none; }
+.area-popup .leaflet-popup-content { max-height: 35vh; overflow-y: auto; overflow-wrap: anywhere; }
+.side:has(.area-explorer[open]) { overflow-y: auto; }
+.side:has(.area-explorer[open]) .pinlist { flex: none; overflow: visible; }

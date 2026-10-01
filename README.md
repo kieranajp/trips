@@ -96,3 +96,24 @@ Sync is **last successful write wins for the whole trip**: concurrent devices
 can overwrite each other's edits, including pins and areas. There is no merge or
 revision check. Older clients that omit areas restore seed semantics when their
 write wins. Invalid remote areas are rejected without overwriting that snapshot.
+
+
+### Reading areas
+
+Hover over an outline to read its full name and note without moving the map.
+Move into the card to keep it open. Click or tap to select it; hovering other
+areas leaves the selection in place. Escape dismisses the card until the pointer
+leaves and re-enters. Pin and stay cards take precedence over area hover.
+
+Use **Explore areas** to read the same full notes with a keyboard or touch. Each
+area has its own disclosure and **Show on map** button. That button enables areas,
+fits the outline and opens its card while keeping keyboard focus on the button.
+The explorer stays readable when the map's Areas toggle is off.
+
+Optional `label`, `labelAt` and `labelMinZoom` control short map labels, their
+anchor inside the polygon, and their first visible zoom level. Cards and the
+explorer always retain the full area name and note.
+
+The basemap uses CARTO Voyager when `CARTO_API_KEY` is configured. Otherwise it
+uses standard OpenStreetMap tiles with attribution and browser caching, under
+the [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/).
