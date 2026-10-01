@@ -1,5 +1,6 @@
 import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import { signal } from "@preact/signals";
 import { authUser } from "../../web/state/auth.js";
 import { areasOn, cats, editing, only, pins, search, stays, trip } from "../../web/state/signals.js";
 import { createTripMap } from "../../web/features/map/leaflet.js";
@@ -56,6 +57,13 @@ function fakeLeaflet() {
       const polygon = {
         ring,
         opts,
+        closed: 0,
+        unbound: 0,
+        detached: false,
+        closePopup() { this.closed++; },
+        unbindPopup() { this.unbound++; },
+        unbindTooltip() { this.tooltip = null; },
+        off() { this.detached = true; },
         bindPopup(html) { this.popup = html; return this; },
         bindTooltip(text) { this.tooltip = text; return this; },
       };
@@ -223,4 +231,40 @@ test("destroy disposes the effects and removes the map", () => {
   const before = markerGroup.items.length;
   search.value = "tortilla"; // must no longer re-render markers
   assert.equal(markerGroup.items.length, before);
+});
+
+
+test("effective area replacements preserve the map, pins, stays and visibility", () => {
+  const source = signal(definition.neighbourhoods);
+  const { L, map, created } = fakeLeaflet();
+  const controller = createTripMap({}, definition, L, source);
+  const [stayGroup, markerGroup, areaGroup] = created.groups;
+  const marker = markerGroup.items[0];
+  const stay = stayGroup.items[0];
+  const fitted = map.fitted;
+  const views = [...map.views];
+  const oldPolygon = created.polygons[0];
+  areasOn.value = false;
+  source.value = [{ ...definition.neighbourhoods[0], name: "Replacement", approximate: true }];
+  assert.equal(areaGroup.items.length, 1);
+  assert.match(areaGroup.items[0].popup, /Replacement/);
+  assert.ok(oldPolygon.closed > 0);
+  assert.equal(oldPolygon.unbound, 1);
+  assert.equal(oldPolygon.detached, true);
+  assert.equal(oldPolygon.tooltip, null);
+  assert.equal(markerGroup.items[0], marker);
+  assert.equal(stayGroup.items[0], stay);
+  assert.equal(map.fitted, fitted);
+  assert.deepEqual(map.views, views);
+  assert.equal(map.popupsClosed, 0);
+  assert.equal(map.layers.has(areaGroup), false);
+  source.value = [];
+  assert.equal(areaGroup.items.length, 0);
+  areasOn.value = true;
+  source.value = definition.neighbourhoods;
+  assert.equal(areaGroup.items.length, 1);
+  assert.equal(map.layers.has(areaGroup), true);
+  controller.destroy();
+  source.value = [];
+  assert.equal(created.polygons.length, 3);
 });

@@ -36,6 +36,6 @@ export function stayPopupHtml(stay) {
 }
 
 export function neighbourhoodPopupHtml(neighbourhood) {
-  return `<div class="pop-tag" style="color:${escapeHtml(neighbourhood.color)}">Neighbourhood</div>
+  return `<div class="pop-tag" style="color:${escapeHtml(neighbourhood.color)}">${neighbourhood.approximate ? "Approximate travel area" : "Neighbourhood"}</div>
     <div class="pop-nm">${escapeHtml(neighbourhood.name)}</div><p class="pop-nt">${escapeHtml(neighbourhood.note)}</p>`;
 }

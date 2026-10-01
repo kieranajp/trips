@@ -1,5 +1,5 @@
 import { effect } from "@preact/signals";
-import { areasOn, catById, editing, pins, stays, trip, visiblePins } from "../../state/signals.js";
+import { areasOn, catById, effectiveAreas, editing, pins, stays, trip, visiblePins } from "../../state/signals.js";
 import { toggleVisited } from "../../state/actions.js";
 import { escapeHtml } from "../../lib/html.js";
 import { homeIconSpec, pinIconSpec } from "./icons.js";
@@ -10,12 +10,7 @@ const hasCoords = (place) => place
   && place.lat != null && place.lng != null
   && !Number.isNaN(+place.lat) && !Number.isNaN(+place.lng);
 
-// createTripMap owns one Leaflet map: base tiles, the marker/stay/
-// neighbourhood layers, and the signal effects that keep them in sync with
-// state. Leaflet stays imperative and outside the Preact tree (see AGENTS.md);
-// this factory just gives that code a boundary — no module globals, effects
-// disposed on destroy(), and L injectable so tests can drive it with a fake.
-export function createTripMap(element, definition, L = window.L) {
+export function createTripMap(element, definition, L = window.L, areaSource = null) {
   const map = L.map(element, { zoomControl: true });
   const env = typeof window !== "undefined" ? window.ENV : null;
   const tileUrl = env?.cartoApiKey
@@ -31,18 +26,36 @@ export function createTripMap(element, definition, L = window.L) {
   const stayLayer = L.layerGroup().addTo(map);
   const markerLayer = L.layerGroup().addTo(map);
   const neighbourhoodLayer = L.layerGroup();
-  (definition.neighbourhoods || []).forEach((neighbourhood) => {
-    const polygon = L.polygon(neighbourhood.ring, {
-      color: neighbourhood.color,
-      weight: 1.6,
-      dashArray: "5 5",
-      fillColor: neighbourhood.color,
-      fillOpacity: 0.1,
+  let areaPolygons = [];
+
+  function clearAreas() {
+    areaPolygons.forEach((polygon) => {
+      polygon.closePopup?.();
+      polygon.unbindPopup?.();
+      polygon.unbindTooltip?.();
+      polygon.off?.();
     });
-    polygon.bindPopup(neighbourhoodPopupHtml(neighbourhood), { maxWidth: 250 });
-    polygon.bindTooltip(escapeHtml(neighbourhood.name), { permanent: true, direction: "center", className: "nb-label" });
-    neighbourhoodLayer.addLayer(polygon);
-  });
+    areaPolygons = [];
+    neighbourhoodLayer.clearLayers();
+  }
+
+  function renderAreas() {
+    const areas = areaSource ? areaSource.value : definition.neighbourhoods || [];
+    clearAreas();
+    areas.forEach((area) => {
+      const polygon = L.polygon(area.ring, {
+        color: area.color,
+        weight: 1.6,
+        dashArray: "5 5",
+        fillColor: area.color,
+        fillOpacity: 0.1,
+      });
+      polygon.bindPopup(neighbourhoodPopupHtml(area), { maxWidth: 250 });
+      polygon.bindTooltip(escapeHtml(area.name), { permanent: true, direction: "center", className: "nb-label", interactive: false });
+      neighbourhoodLayer.addLayer(polygon);
+      areaPolygons.push(polygon);
+    });
+  }
 
   const markers = {};
 
@@ -90,9 +103,16 @@ export function createTripMap(element, definition, L = window.L) {
   }
 
   const disposers = [
+    effect(renderAreas),
     effect(renderMarkers),
     effect(renderStays),
-    effect(() => { areasOn.value ? neighbourhoodLayer.addTo(map) : map.removeLayer(neighbourhoodLayer); }),
+    effect(() => {
+      if (areasOn.value) neighbourhoodLayer.addTo(map);
+      else {
+        areaPolygons.forEach((polygon) => polygon.closePopup?.());
+        map.removeLayer(neighbourhoodLayer);
+      }
+    }),
   ];
   fitAll();
 
@@ -111,6 +131,7 @@ export function createTripMap(element, definition, L = window.L) {
     },
     destroy() {
       disposers.splice(0).forEach((dispose) => dispose());
+      clearAreas();
       map.remove();
     },
   };
@@ -123,7 +144,7 @@ let instance = null;
 
 export function mountMap(element) {
   if (!instance) {
-    instance = createTripMap(element, trip.value);
+    instance = createTripMap(element, trip.value, window.L, effectiveAreas);
     followPermalink(instance);
   }
   return instance;

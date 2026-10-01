@@ -4,6 +4,7 @@ import { cats, pins, tab } from "../../state/signals.js";
 import { canEdit, login } from "../../state/auth.js";
 import { addCat, deleteCat, reset, updateCat } from "../../state/actions.js";
 import { exportJson, importFile } from "./import-export.js";
+import { AreaFiles } from "./AreaFiles.js";
 
 export function SetupView() {
   const fileRef = useRef();
@@ -62,9 +63,11 @@ export function SetupView() {
         </div>
         ${editable ? html`<p class="hint" style="margin-top:10px"><strong>Google Takeout saves:</strong> export a Saved list's CSV and import it here. The CSV has no coordinates, so each place is geocoded by name (one per second) and lands in the “Saved” category — anything that mislocates, just edit it. (Our own JSON export round-trips everything, categories included.)</p>` : null}
 
+        <${AreaFiles}/>
+
         ${editable ? html`
           <h3>Reset</h3>
-          <p class="hint">Wipes this trip's pins and categories back to the seeded set.</p>
+          <p class="hint">Restores this trip's seeded pins, categories, flights, stays and areas, removing custom areas.</p>
           <button class="btn ghost" style="color:#a3341f;border-color:rgba(163,52,31,.4)" onClick=${reset}>Reset everything</button>` : null}
       </div>
     </section>`;

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { html } from "htm/preact";
-import { areasOn, cats, editing, only, search, searchedPins, tab, trip, visiblePins } from "../../state/signals.js";
+import { areasOn, cats, effectiveAreas, editing, only, search, searchedPins, tab, visiblePins } from "../../state/signals.js";
 import { canEdit } from "../../state/auth.js";
 import { removePin, savePin, toggleOnly, toggleVisited, toast } from "../../state/actions.js";
 import { fmtDay } from "../../lib/dates.js";
@@ -80,7 +80,7 @@ export function MapView() {
   useEffect(() => { mountMap(mapRef.current); }, []);
   useEffect(() => initSheet(viewRef.current, sideRef.current, handleRef.current), []);
   useEffect(() => { if (tab.value === "map") invalidate(); }, [tab.value]);
-  const hasNeighbourhoods = trip.value.neighbourhoods?.length;
+  const hasNeighbourhoods = effectiveAreas.value.length;
   return html`
     <section class=${"view" + (tab.value === "map" ? " on" : "")} id="view-map" ref=${viewRef}>
       <div id="map" ref=${mapRef}></div>
@@ -90,7 +90,7 @@ export function MapView() {
         <div class="subtle">Tap a pin in the list to fly to it; tap a category below to show only that.</div>
         <div class="actionbar">
           ${canEdit.value ? html`<button class="btn primary" title="Paste a Google Maps link to add a pin" onClick=${pinFromLink}>+ Paste Maps link</button>` : null}
-          ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle neighbourhood areas"
+          ${hasNeighbourhoods ? html`<button class=${"btn" + (areasOn.value ? "" : " ghost")} title="Toggle trip areas" aria-pressed=${areasOn.value}
             onClick=${() => (areasOn.value = !areasOn.value)}>Areas: ${areasOn.value ? "on" : "off"}</button>` : null}
         </div>
         <div class="pinsearch">

@@ -40,3 +40,19 @@ test("freshState defaults flights and stays to empty arrays", () => {
   assert.equal(withLogistics.flights.length, 1);
   assert.equal(withLogistics.stays[0].name, "Hotel");
 });
+
+test("fresh state follows area seeds", () => assert.equal(freshState(definition).areaOverride, null));
+test("boot accepts missing, null and empty overrides and rejects malformed data", async () => {
+  const { installBrowserStubs } = await import("./helpers/browser-stubs.js");
+  const { boot } = await import("../../web/state/trips.js");
+  const { areaOverride, areaErrors } = await import("../../web/state/signals.js");
+  const stubs = installBrowserStubs();
+  globalThis.location = { search: "?trip=demo" }; globalThis.document = {};
+  globalThis.fetch = async () => ({ ok: true, json: async () => definition });
+  for (const override of [undefined, null, [], "bad"]) {
+    stubs.store.set("trip_state_demo", JSON.stringify({ ...freshState(definition), areaOverride: override }));
+    await boot();
+    assert.deepEqual(areaOverride.value, Array.isArray(override) ? [] : null);
+    assert.equal(areaErrors.value.length > 0, override === "bad");
+  }
+});

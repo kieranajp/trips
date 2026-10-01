@@ -46,3 +46,53 @@ Push to `main`. CI tests, builds an image, pushes it to GHCR, and Helm-upgrades 
 ---
 
 🤖 Working on this with an AI agent? See [AGENTS.md](AGENTS.md).
+
+## Area files
+
+Open **Setup → Areas → Export areas** to download `<trip-id>-areas.json`, including
+an empty template for trips without seeds. Edit the JSON, then sign in and choose
+**Import area file**. Review the added, changed and removed IDs before Apply;
+Cancel leaves the trip unchanged. Imports replace the whole area set. Omitted
+IDs are removed and `"areas": []` clears it, including after reload. **Restore
+seeded areas** previews a return to the current trip definition. Reset everything
+also removes custom areas. Pin import/export does not change areas.
+
+```json
+{
+  "type": "trips-areas",
+  "version": 1,
+  "tripId": "oviedo",
+  "areas": [{
+    "id": "example",
+    "name": "Example travel area",
+    "note": "An indicative outline for a walk.",
+    "color": "#c26b3d",
+    "approximate": true,
+    "ring": [[43.36, -5.85], [43.36, -5.84], [43.35, -5.84]]
+  }]
+}
+```
+
+Coordinates are `[latitude, longitude]`. This format accepts one simple ring per
+area, not GeoJSON. Rings need 3–500 distinct vertices; an optional repeated closing
+vertex is removed. Self-intersections, zero-area rings, duplicate vertices,
+antimeridian crossings and coordinates outside ±85.05112878 latitude or ±180
+longitude are rejected. Overlap between different areas is allowed.
+
+Files are limited to 256 KiB UTF-8 and 100 areas. The complete trip state must fit
+the server's 1 MiB limit. All shown fields are required; unknown fields are
+rejected. IDs contain 1–64 lowercase letters, digits or hyphens. Names are
+nonblank, at most 120 characters; notes are plain text, at most 4,000 characters.
+Colours use six hexadecimal digits. `approximate` is boolean; true adds an
+approximation notice, while false makes no official-boundary claim. Optional
+`label` (nonblank, at most 120 characters), `labelAt` (coordinate inside the
+polygon) and `labelMinZoom` (integer 0–19) are retained in files.
+
+Apply first saves on this device, then syncs to the server. Pending and failed
+writes stay local across reload; **Retry sync** sends them again. Sign in if the
+server rejects an unauthorised write. Focus updates cannot overwrite a pending
+local save. Once synced, the next successful pull adopts the server's snapshot.
+Sync is **last successful write wins for the whole trip**: concurrent devices
+can overwrite each other's edits, including pins and areas. There is no merge or
+revision check. Older clients that omit areas restore seed semantics when their
+write wins. Invalid remote areas are rejected without overwriting that snapshot.

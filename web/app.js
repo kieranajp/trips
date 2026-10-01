@@ -8,11 +8,11 @@ import { checkAuth } from "./state/auth.js";
 
 await boot();
 render(html`<${App}/>`, document.getElementById("app"));
-if (trip.value) initSync();
 
 // Discover login state, and re-check on focus in case the session expired or
 // the user logged in/out in another tab.
-checkAuth();
+await checkAuth();
+if (trip.value) initSync();
 window.addEventListener("focus", checkAuth);
 
 // PWA: the service worker only adds offline fallback (network-first), so a

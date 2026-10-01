@@ -25,6 +25,10 @@ export function importFile(file) {
     const text = reader.result;
     let json = null;
     try { json = JSON.parse(text); } catch (_) {}
+    if (json?.type === "trips-areas") {
+      toast("This is an area file. Use Import areas in the Areas section.");
+      return;
+    }
     if (json && Array.isArray(json.pins) && Array.isArray(json.categories)) importJson(json);
     else importCsv(text);
   };

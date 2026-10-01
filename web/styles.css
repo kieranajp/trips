@@ -200,3 +200,15 @@ main { flex: 1; min-height: 0; position: relative; }
 .catrow.ro .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 .catrow.ro .nm { flex: 1; font-size: 13px; }
 .idea-tag { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.area-preview, .area-errors, .area-sync { padding: 12px 14px; margin: 12px 0; border: 1px solid var(--line); border-radius: 4px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.area-preview { background: var(--panel); }
+.area-preview p, .area-errors p, .area-sync p { margin: 0 0 8px; }
+.area-preview dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 12px; }
+.area-preview dt { font-weight: 600; }
+.area-preview dd { margin: 0; }
+.area-errors { color: #8c2d1c; border-color: rgba(163, 52, 31, .4); }
+.area-errors ul { padding-left: 20px; margin: 8px 0; }
+.area-sync-help { margin-top: 12px !important; }
+.btn:focus-visible { outline: 2px solid #2c8f96; outline-offset: 3px; }
+.pop-nt { white-space: pre-wrap; }

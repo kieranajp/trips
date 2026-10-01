@@ -771,3 +771,18 @@ func TestPWAAssetsEmbedded(t *testing.T) {
 		t.Error("app.js does not register /sw.js")
 	}
 }
+
+func TestStateAreaOverrideRoundTrip(t *testing.T) {
+	srv := newTestServer(t)
+	for _, override := range []string{"null", "[]", `[{"id":"test","ring":[[1,1],[1,2],[2,2]]}]`} {
+		state := `{"pins":[],"categories":[],"areaOverride":` + override + `}`
+		res := do(t, http.MethodPut, srv.URL+"/state?trip=oviedo", "application/json", state)
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("PUT status = %d", res.StatusCode)
+		}
+		res = do(t, http.MethodGet, srv.URL+"/state?trip=oviedo", "", "")
+		if got := readBody(t, res); got != state {
+			t.Fatalf("got %s, want %s", got, state)
+		}
+	}
+}

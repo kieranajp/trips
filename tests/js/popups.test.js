@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { authUser } from "../../web/state/auth.js";
 import { cats } from "../../web/state/signals.js";
 import { escapeHtml } from "../../web/lib/html.js";
-import { mapsUrl, pinPopupHtml, stayPopupHtml } from "../../web/features/map/popups.js";
+import { mapsUrl, neighbourhoodPopupHtml, pinPopupHtml, stayPopupHtml } from "../../web/features/map/popups.js";
 
 beforeEach(() => {
   cats.value = [{ id: "pintxos", name: "Pintxos", color: "#d9822b" }];
@@ -76,4 +76,20 @@ test("stayPopupHtml escapes name and address", () => {
   assert.ok(!html.includes("<i>"));
   assert.ok(html.includes("1 &quot;Main&quot; St"));
   assert.ok(!html.includes("javascript:"));
+});
+
+
+test("area popups show approximation only when marked and escape imported content", () => {
+  const area = { name: "<b>Full area name</b>", note: '<script>bad()</script> & "note"', color: '#abcdef" onclick="bad()', label: "Short" };
+  const legacy = neighbourhoodPopupHtml(area);
+  assert.match(legacy, />Neighbourhood<\/div>/);
+  assert.ok(!legacy.includes("Approximate"));
+  assert.ok(!legacy.includes("<b>"));
+  assert.ok(!legacy.includes("<script>"));
+  assert.ok(!legacy.includes('" onclick="'));
+  assert.ok(legacy.includes("&lt;b&gt;Full area name&lt;/b&gt;"));
+  assert.ok(legacy.includes("&amp; &quot;note&quot;"));
+  assert.ok(!legacy.includes("Short"));
+  assert.ok(neighbourhoodPopupHtml({ ...area, approximate: true }).includes("Approximate travel area"));
+  assert.ok(!neighbourhoodPopupHtml({ ...area, approximate: false }).includes("Approximate travel area"));
 });

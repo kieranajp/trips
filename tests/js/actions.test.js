@@ -4,7 +4,7 @@ import { installBrowserStubs } from "./helpers/browser-stubs.js";
 
 const stubs = installBrowserStubs();
 
-const { cats, flights, only, pins, stays, toastMsg, trip } = await import("../../web/state/signals.js");
+const { areaOverride, cats, flights, only, pins, stays, toastMsg, trip } = await import("../../web/state/signals.js");
 const {
   deleteCat, removePin, reset, savePin, saveStay, toggleCatalog, toggleOnly, toggleVisited,
 } = await import("../../web/state/actions.js");
@@ -136,7 +136,9 @@ test("toggleOnly toggles the single-category filter", () => {
 test("reset restores the seeded state from the trip definition", () => {
   pins.value = [{ id: "p_x", name: "User pin", cat: "pintxos" }];
   cats.value = [...cats.value, { id: "extra", name: "Extra", color: "#000" }];
+  areaOverride.value = [];
   reset();
+  assert.equal(areaOverride.value, null);
   assert.deepEqual(pins.value.map((pin) => pin.id), ["p_gure"]);
   assert.deepEqual(cats.value.map((category) => category.id), ["pintxos"]);
 });
