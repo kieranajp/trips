@@ -117,3 +117,15 @@ explorer always retain the full area name and note.
 The basemap uses CARTO Voyager when `CARTO_API_KEY` is configured. Otherwise it
 uses standard OpenStreetMap tiles with attribution and browser caching, under
 the [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/).
+
+### Gijón travel areas
+
+Gijón ships eight independently authored travel zones: La Arena, Cimavilla,
+Centro / El Carmen, Marina / El Muelle, Fomento, El Llano,
+Poniente / Natahoyo / west, and Somió / east. Their notes include the trip's
+personal fit preferences. Colours distinguish zones rather than scores.
+
+These are approximate travel areas with indicative edges and deliberate gaps,
+not official neighbourhood boundaries or claims about which venues belong to
+which district. Marina, Fomento and Centro remain separately selectable. Use
+Setup's area export/import to customize them, or restore the seeded outlines.
