@@ -138,3 +138,29 @@ These are approximate travel areas with indicative edges and deliberate gaps,
 not official neighbourhood boundaries or claims about which venues belong to
 which district. Marina, Fomento and Centro remain separately selectable. Use
 Setup's area export/import to customize them, or restore the seeded outlines.
+
+
+### Bilbao and Oviedo travel areas
+
+Bilbao has six practical zones: Indautxu / Ensanche, Bilbao la Vieja (“Bilbi”),
+Deusto, Casco Viejo, Pozas / San Mamés, and Guggenheim / Abandoibarra. Oviedo
+has six: Ruta de los Vinos, the western Ensanche, Uría / Campoamor, Gascona /
+Foncalada, the Cathedral / old town, and Fontán / Trascorrales.
+
+Their concise notes favour local bars, coffee, wine/vermouth and worthwhile
+food stops. The three scores express editorial travel preferences; touristiness
+measures visitor focus, not food quality. Outlines are independently authored
+travel envelopes with deliberate gaps, not official district boundaries or venue
+membership rules. They use the same files and explorer as Gijón.
+
+New seeds appear when `areaOverride` is missing or null. Existing custom areas
+(including an empty set) stay unchanged. To adopt these seeds, export any custom
+areas you want to keep, then use **Setup → Areas → Restore seeded areas** and
+review the replacement. Pins, categories, flights and stays are preserved.
+
+Geographic context comes from the official [Bilbao pintxos routes](https://www.bilbaoturismo.net/BilbaoTurismo/es/rutas),
+[Bilbao la Vieja guide](https://www.bilbao.eus/servlet/Satellite/BilbaoTurismo/es/espacio-bilbao-la-vieja/bilbao-la-vieja),
+[Oviedo visitor guide](https://www.turismoasturias.es/documents/39908/11979417/Guia-visitar-Oviedo-ES.pdf)
+and [Asturias cities guide](https://www.turismoasturias.es/documents/39908/2503855/Ciudades_ES.pdf/fbf136c7-c577-bb84-efb2-dd7ece45a436).
+Coffee/gourmet detours also use the trip's existing venue pins. Sources inform
+area character; the outlines and scores are our own travel judgments.

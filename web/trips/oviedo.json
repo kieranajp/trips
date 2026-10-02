@@ -216,5 +216,246 @@
       "url": "https://www.google.com/maps/place/Bangkok+14/data=!4m2!3m1!1s0xd368dd045950367:0xe10983af703fc938"
     }
   ],
-  "neighbourhoods": []
+  "neighbourhoods": [
+    {
+      "id": "ruta-de-los-vinos",
+      "name": "Ruta de los Vinos / Manuel Pedregal",
+      "note": "Compact wine-bar circuit around Manuel Pedregal, Campoamor, Río San Pedro and Fray Ceferino. Look for a glass of wine or vermouth and a small plate, rather than a big destination meal. Popular with ovetenses as well as visitors. Fit for this trip: very high.",
+      "color": "#8c2f4a",
+      "approximate": true,
+      "ring": [
+        [
+          43.36525,
+          -5.8533
+        ],
+        [
+          43.36735,
+          -5.8533
+        ],
+        [
+          43.3676,
+          -5.8527
+        ],
+        [
+          43.3676,
+          -5.8498
+        ],
+        [
+          43.36525,
+          -5.8498
+        ]
+      ],
+      "label": "Wine route",
+      "labelAt": [
+        43.3664,
+        -5.85155
+      ],
+      "labelMinZoom": 14,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 5,
+        "ourKindOfPlace": 5
+      }
+    },
+    {
+      "id": "ensanche-west",
+      "name": "Ensanche west / coffee & gourmet stops",
+      "note": "A practical detour west of Uría for the saved specialty-coffee and gourmet-wine stops, including Pionero and Coalla. Follow those pins and nearby small bars; this is a loose walking area, not a claim that every block is a food destination. Less focused on monument sightseeing. Fit for this trip: high.",
+      "color": "#6f4e37",
+      "approximate": true,
+      "ring": [
+        [
+          43.3618,
+          -5.857
+        ],
+        [
+          43.3648,
+          -5.857
+        ],
+        [
+          43.3651,
+          -5.8564
+        ],
+        [
+          43.3651,
+          -5.8518
+        ],
+        [
+          43.3618,
+          -5.8518
+        ]
+      ],
+      "label": "Coffee / gourmet",
+      "labelAt": [
+        43.36365,
+        -5.85455
+      ],
+      "labelMinZoom": 14,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 4,
+        "ourKindOfPlace": 4
+      }
+    },
+    {
+      "id": "centro-uria-campoamor",
+      "name": "Centro / Uría & Campoamor",
+      "note": "The central shopping and theatre streets beside Campo de San Francisco. Look for pinchos, a café break or a small wine bar on the side streets; use the saved tapas and cocktail pins as starting points. A mix of daily city life and visitors, with less need to eat on the busiest frontage. Fit for this trip: high.",
+      "color": "#b38a36",
+      "approximate": true,
+      "ring": [
+        [
+          43.3608,
+          -5.85155
+        ],
+        [
+          43.3648,
+          -5.85155
+        ],
+        [
+          43.36505,
+          -5.8508
+        ],
+        [
+          43.36505,
+          -5.84575
+        ],
+        [
+          43.3608,
+          -5.84575
+        ]
+      ],
+      "label": "Centro",
+      "labelAt": [
+        43.36285,
+        -5.8482
+      ],
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 3,
+        "foodDrink": 4,
+        "ourKindOfPlace": 4
+      }
+    },
+    {
+      "id": "gascona-foncalada",
+      "name": "Gascona / Foncalada — cider circuit",
+      "note": "Gascona is the Bulevar de la Sidra: a concentrated stop for poured cider and Asturian dishes, with Foncalada nearby. Look for a sidrería whose menu suits you and compare prices before sitting down. A prominent visitor destination; visit selectively rather than assuming the busiest terrace is the best fit. Fit for this trip: medium.",
+      "color": "#5f7d4a",
+      "approximate": true,
+      "ring": [
+        [
+          43.363,
+          -5.84555
+        ],
+        [
+          43.3652,
+          -5.84555
+        ],
+        [
+          43.3655,
+          -5.8449
+        ],
+        [
+          43.3655,
+          -5.84
+        ],
+        [
+          43.363,
+          -5.84
+        ]
+      ],
+      "label": "Gascona",
+      "labelAt": [
+        43.36415,
+        -5.8429
+      ],
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 4,
+        "foodDrink": 4,
+        "ourKindOfPlace": 3
+      }
+    },
+    {
+      "id": "cathedral-old-town",
+      "name": "Cathedral / northern old town",
+      "note": "The cathedral and surrounding historic streets make this the main sightseeing pocket. Pinchos, tostas and tapas are part of the offer around the cathedral and Cimadevilla; look beyond the main square for a small bar that appeals. Expect plenty of visitors and choose food stops individually. Fit for this trip: medium.",
+      "color": "#4d7e94",
+      "approximate": true,
+      "ring": [
+        [
+          43.361,
+          -5.84555
+        ],
+        [
+          43.36285,
+          -5.84555
+        ],
+        [
+          43.36285,
+          -5.8406
+        ],
+        [
+          43.3613,
+          -5.8406
+        ],
+        [
+          43.361,
+          -5.8412
+        ]
+      ],
+      "label": "Cathedral",
+      "labelAt": [
+        43.36215,
+        -5.84325
+      ],
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 5,
+        "foodDrink": 3,
+        "ourKindOfPlace": 3
+      }
+    },
+    {
+      "id": "fontan-trascorrales",
+      "name": "El Fontán / Trascorrales & southern old town",
+      "note": "The market and old-town squares are a good setting for an aperitivo and a small-plate wander. Look for vermouth, pinchos and Asturian ingredients; the saved Pinchito stop anchors this end of the walk. Fontán is much visited, so browse the menu and side streets rather than choosing purely for the square. Fit for this trip: high.",
+      "color": "#c26b3d",
+      "approximate": true,
+      "ring": [
+        [
+          43.35855,
+          -5.8463
+        ],
+        [
+          43.3607,
+          -5.8463
+        ],
+        [
+          43.3607,
+          -5.8415
+        ],
+        [
+          43.35885,
+          -5.8415
+        ],
+        [
+          43.35855,
+          -5.8421
+        ]
+      ],
+      "label": "Fontán",
+      "labelAt": [
+        43.35975,
+        -5.8442
+      ],
+      "labelMinZoom": 15,
+      "ratings": {
+        "touristiness": 4,
+        "foodDrink": 4,
+        "ourKindOfPlace": 4
+      }
+    }
+  ]
 }
