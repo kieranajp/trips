@@ -273,9 +273,11 @@
   ],
   "neighbourhoods": [
     {
+      "id": "indautxu-ensanche",
       "name": "Indautxu / Ensanche",
+      "note": "The main pintxos-and-wine base: García Rivero, Diputación and Ledesma mix established counters with newer bars. Look for a lively bar, txakoli by the glass and a short seasonal menu; make room for vermouth or a specialty-coffee stop. Mixed city-centre life and visitors. Fit for this trip: very high.",
       "color": "#5f7d4a",
-      "note": "Where Bilbainos actually eat — no reservations, just follow the busiest bar. Poteo along Las Pozas, Ledesma & García Rivero; cocktail bars come evening (25–40 crowd, smart-casual). Buzz without the coach traffic. Your best bet for nights out.",
+      "approximate": true,
       "ring": [
         [
           43.2648,
@@ -301,20 +303,37 @@
           43.265,
           -2.9398
         ]
-      ]
+      ],
+      "label": "Indautxu / Ensanche",
+      "labelAt": [
+        43.2617,
+        -2.937
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 5,
+        "ourKindOfPlace": 5
+      }
     },
     {
+      "id": "bilbao-la-vieja",
       "name": "Bilbao la Vieja (“Bilbi”)",
+      "note": "A creative riverside quarter around BilbaoArte and the streets towards Marzana, with galleries and contemporary cooking. Look for independent kitchens, wine-led small plates and café-bars for an afternoon into dinner. Attracts visitors too, but offers a different rhythm from the old-town pintxos circuit. Fit for this trip: very high.",
       "color": "#a34a76",
-      "note": "Ex-mining quarter the artists took over — edgier, less polished, creative kitchens. After dark it's the alternative zone: underground and warehouse electronic. An afternoon-into-dinner wander when you want character over gloss.",
+      "approximate": true,
       "ring": [
         [
-          43.2553,
+          43.2551,
           -2.9242
         ],
         [
           43.2541,
-          -2.9224
+          -2.9217
+        ],
+        [
+          43.2517,
+          -2.9225
         ],
         [
           43.2505,
@@ -332,12 +351,25 @@
           43.2549,
           -2.9288
         ]
-      ]
+      ],
+      "label": "Bilbi",
+      "labelAt": [
+        43.2534,
+        -2.9268
+      ],
+      "labelMinZoom": 14,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 4,
+        "ourKindOfPlace": 5
+      }
     },
     {
+      "id": "deusto",
       "name": "Deusto",
+      "note": "A residential alternative across the river with its own pintxos tradition. Try the streets around Madariaga, Blas de Otero and Lehendakari Aguirre for neighbourhood bars, simple pintxos and a glass of wine. Less oriented to the major sightseeing circuit; a good choice for an everyday local evening. Fit for this trip: high.",
       "color": "#2c8f96",
-      "note": "Student side across the water — cheapest pintxos in the city, calm and green, riverside promenade for a morning walk. Laid-back kalimotxo energy; a cheap, easy evening. Your hotel sits on this same bank, just to the east.",
+      "approximate": true,
       "ring": [
         [
           43.2762,
@@ -359,12 +391,25 @@
           43.2712,
           -2.9562
         ]
-      ]
+      ],
+      "label": "Deusto",
+      "labelAt": [
+        43.2724,
+        -2.949
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 1,
+        "foodDrink": 4,
+        "ourKindOfPlace": 4
+      }
     },
     {
+      "id": "casco-viejo",
       "name": "Casco Viejo",
+      "note": "Historic lanes and a dense pintxos circuit around Plaza Nueva, Calle del Perro and Somera. Strong food-and-wine interest, with substantial visitor traffic. Visit selectively: compare counters and prices, order a few favourites and keep moving rather than choosing a meal for its terrace alone. Fit for this trip: medium.",
       "color": "#c2410c",
-      "note": "Approach with fortitude. Real neighbourhood life under it, but weekends bring crowds spilling into the streets — Perro, Jardines, Siete Calles, 7pm till late. You're midweek: hit Gure Toki/Gatz early, then retreat over the river. Plaza Nueva is prettiest, priciest, densest. A surgical strike, not a basecamp.",
+      "approximate": true,
       "ring": [
         [
           43.2612,
@@ -394,7 +439,98 @@
           43.2601,
           -2.926
         ]
-      ]
+      ],
+      "label": "Casco Viejo",
+      "labelAt": [
+        43.2585,
+        -2.9237
+      ],
+      "labelMinZoom": 14,
+      "ratings": {
+        "touristiness": 5,
+        "foodDrink": 5,
+        "ourKindOfPlace": 3
+      }
+    },
+    {
+      "id": "pozas-san-mames",
+      "name": "Pozas / San Mamés",
+      "note": "The western end of the Poza bar-hopping route, towards San Mamés. Pintxos, wine and an energetic football crowd; match days can make the streets especially busy. Look for a neighbourhood counter for a casual round, and choose another area when you want a quiet wine or coffee stop. Fit for this trip: high.",
+      "color": "#ad8739",
+      "approximate": true,
+      "ring": [
+        [
+          43.2658,
+          -2.954
+        ],
+        [
+          43.2665,
+          -2.947
+        ],
+        [
+          43.2635,
+          -2.9453
+        ],
+        [
+          43.2585,
+          -2.9453
+        ],
+        [
+          43.2587,
+          -2.954
+        ]
+      ],
+      "label": "Pozas / San Mamés",
+      "labelAt": [
+        43.2623,
+        -2.949
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 2,
+        "foodDrink": 4,
+        "ourKindOfPlace": 4
+      }
+    },
+    {
+      "id": "guggenheim-abandoibarra",
+      "name": "Guggenheim / Abandoibarra",
+      "note": "Museum-front river walks, sculpture and contemporary architecture, with a recognised pintxos route in the nearby streets. Strongly visitor-facing. Enjoy the walk, then look inland for a considered wine, coffee or cocktail stop rather than eating solely for the museum view. Fit for this trip: lower.",
+      "color": "#557da8",
+      "approximate": true,
+      "ring": [
+        [
+          43.2654,
+          -2.943
+        ],
+        [
+          43.2661,
+          -2.9405
+        ],
+        [
+          43.2698,
+          -2.9342
+        ],
+        [
+          43.2693,
+          -2.929
+        ],
+        [
+          43.2654,
+          -2.929
+        ]
+      ],
+      "label": "Guggenheim / river",
+      "labelAt": [
+        43.2671,
+        -2.9355
+      ],
+      "labelMinZoom": 13,
+      "ratings": {
+        "touristiness": 5,
+        "foodDrink": 3,
+        "ourKindOfPlace": 2
+      }
     }
   ]
 }
